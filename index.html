@@ -1,1663 +1,2521 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🎸 Guitar Trainer</title>
     <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter for clean typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+<link rel="stylesheet" href="style.css">
     <style>
-        /* Global transition for subtle smoothness, adjusted from 1s to 0.3s */
-        * {
-            transition: all 0.3s ease-in-out;
-        }
-        body {
-           font-family: 'Inter', sans-serif;
-            /* Gradient background for glassmorphism effect */
-            background: linear-gradient(135deg, #2a2a72 0%, #009ffd 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            color: #e2e8f0; /* Default text color for the theme */
-        }
-        /* Base Glassmorphism effect */
-        .glass-effect {
-            background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent white */
-            backdrop-filter: blur(10px); /* Core blur effect */
-            -webkit-backdrop-filter: blur(10px); /* Safari support */
-            border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
-            border-radius: 16px; /* Rounded corners */
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2); /* Soft shadow */
-        }
-        /* Main Container specific styling */
-        .main-container {
-            @apply glass-effect p-8 w-full max-w-4xl flex flex-col items-center space-y-6;
-        }
+      /* Global transition for subtle smoothness, adjusted from 1s to 0.3s */
+      * {
+        transition: all 0.3s ease-in-out;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        /* Gradient background for glassmorphism effect */
+        background: linear-gradient(120deg, #1f1c2c, #928dab);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        color: #e2e8f0; /* Default text color for the theme */
+      }
+      /* Base Glassmorphism effect */
+      .glass-effect {
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.15
+        ); /* Semi-transparent white */
+        backdrop-filter: blur(10px); /* Core blur effect */
+        -webkit-backdrop-filter: blur(10px); /* Safari support */
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+        border-radius: 16px; /* Rounded corners */
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2); /* Soft shadow */
+      }
+      /* Main Container specific styling */
+      .main-container {
+        @apply glass-effect p-8 w-full max-w-4xl flex flex-col items-center space-y-6;
+      }
 
-        /* Mode Selection Buttons */
-        .mode-button {
-            @apply px-8 py-3 text-lg font-semibold transition-colors duration-300 rounded-xl; /* Increased padding */
-            /* Default styles overridden by JS for selected/unselected */
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px;
-            width: 100px;
-        }
-        .mode-button:not(.selected) {
-            @apply glass-effect;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-        }
-        .mode-button:not(.selected):hover {
-            background-color: rgba(255, 255, 255, 0.25);
-        }
-        .mode-button.selected {
-            background-color: rgba(139, 92, 246, 0.4); /* Purple with transparency */
-            border-color: rgba(139, 92, 246, 0.6);
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-            color: #e2e8f0;
-        }
+      /* Mode Selection Buttons */
+      .mode-button {
+        @apply px-8 py-3 text-lg font-semibold transition-colors duration-300 rounded-xl; /* Increased padding */
+        /* Default styles overridden by JS for selected/unselected */
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 10px;
+        width: 100px;
+      }
+      .mode-button:not(.selected) {
+        @apply glass-effect;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+      }
+      .mode-button:not(.selected):hover {
+        background-color: rgba(255, 255, 255, 0.25);
+      }
+      .mode-button.selected {
+        background-color: rgba(
+          139,
+          92,
+          246,
+          0.4
+        ); /* Purple with transparency */
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        color: #e2e8f0;
+      }
 
-        /* String Selection Buttons (Trainer Mode) */
-        .string-button {
-             @apply py-3 px-4 text-sm font-bold transition-colors duration-300 rounded-lg shadow-md; /* Increased padding */
-             /* Default styles overridden by JS for selected/unselected */
-             border: 1px solid rgba(255, 255, 255, 0.12);
-             padding: 10px;
-        }
-        .string-button:not(.selected) {
-            @apply glass-effect;
-            background-color: rgba(255, 255, 255, 0.08);
-            color: #cbd5e0;
-        }
-        .string-button:not(.selected):hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
-        .string-button.selected {
-            background-color: rgba(139, 92, 246, 0.4);
-            border-color: rgba(139, 92, 246, 0.6);
-            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
-            color: #e2e8f0;
-        }
+      /* String Selection Buttons (Trainer Mode) */
+      .string-button {
+        @apply py-3 px-4 text-sm font-bold transition-colors duration-300 rounded-lg shadow-md; /* Increased padding */
+        /* Default styles overridden by JS for selected/unselected */
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 10px;
+      }
+      .string-button:not(.selected) {
+        @apply glass-effect;
+        background-color: rgba(255, 255, 255, 0.08);
+        color: #cbd5e0;
+      }
+      .string-button:not(.selected):hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+      .string-button.selected {
+        background-color: rgba(139, 92, 246, 0.4);
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
+        color: #e2e8f0;
+      }
 
-        /* General styles for content sections within modes */
-        .mode-section > div:not(.string-buttons, .flex-wrap) {
-            @apply glass-effect p-6 w-full rounded-xl;
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            max-width: 600px; /* Consistent max-width for content boxes */
-        }
+      /* General styles for content sections within modes */
+      .mode-section > div:not(.string-buttons, .flex-wrap) {
+        @apply glass-effect p-6 w-full rounded-xl;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        max-width: 600px; /* Consistent max-width for content boxes */
+      }
 
-        /* Ensure display labels have consistent height and smooth transitions */
-        #trainerNoteLabel, #trainerResultLabel, #trainerDebugLabel,
-        #tunerNoteLabel, #tunerOctaveLabel, #tunerCentsLabel, #tunerDebugLabel,
-        #progressionOutput {
-            min-height: 2.5rem; /* Prevent layout shift for empty lines */
-            transition: color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth text transitions */
-        }
-        #tunerNoteLabel {
-            transition: color 0.3s ease-in-out; /* Tuner note color changes */
-        }
-        
-        /* Dropdowns and Text Inputs */
-        select, input[type="text"] {
-            @apply glass-effect p-3 rounded-lg; /* Increased padding */
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #e2e8f0;
-            width: 100%; /* Ensure they fill their container */
-            max-width: 300px; /* Optional: cap width for large screens */
-        }
-        select:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
-        }
-        option {
-            background-color: #1a202c; /* Ensure options are readable on dark background */
-            color: #e2e8f0;
-        }
+      /* Ensure display labels have consistent height and smooth transitions */
+      #trainerNoteLabel,
+      #trainerResultLabel,
+      #tunerNoteLabel,
+      #tunerOctaveLabel,
+      #tunerCentsLabel,
+      #progressionOutput {
+        min-height: 2.5rem; /* Prevent layout shift for empty lines */
+        transition: color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth text transitions */
+      }
+      #tunerNoteLabel {
+        transition: color 0.3s ease-in-out; /* Tuner note color changes */
+      }
 
-        /* Result Label Status Colors */
-        .result-label[data-status="correct"] { color: #84cc16; } /* Brighter Green */
-        .result-label[data-status="wrong"] { color: #ef4444; } /* Red */
-        .result-label[data-status="neutral"] { color: #a0aec0; } /* Gray */
-        .result-label[data-status="inactive"] { color: #6b7280; } /* Faded gray for inactive notes */
+      /* Dropdowns and Text Inputs */
+      select,
+      input[type="text"] {
+        @apply glass-effect p-3 rounded-lg; /* Increased padding */
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        width: 100%; /* Ensure they fill their container */
+        max-width: 300px; /* Optional: cap width for large screens */
+      }
+      select:focus,
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+      }
+      option {
+        background-color: #1a202c; /* Ensure options are readable on dark background */
+        color: #e2e8f0;
+      }
 
-        /* Tuner Visualizer */
-        .tuner-gauge-container {
-            @apply glass-effect rounded-full;
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            width: 100%;
-            height: 50px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .tuner-needle {
-            position: absolute;
-            width: 4px;
-            height: 40px;
-            background-color: #f7fafc; /* White needle */
-            border-radius: 9999px;
-            transition: transform 0.1s ease-out; /* Smooth movement */
-            left: 50%;
-            transform: translateX(-50%) rotateZ(0deg); /* Initial position */
-            transform-origin: bottom center;
-            z-index: 10;
-        }
-        .tuner-segment {
-            height: 100%;
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: #a0aec0;
-            transition: background-color 0.1s ease-out;
-        }
-        .tuner-segment.flat { background-color: rgba(239, 68, 68, 0.1); }
-        .tuner-segment.sharp { background-color: rgba(59, 130, 246, 0.1); }
-        .tuner-segment.in-tune { background-color: rgba(16, 185, 129, 0.4); }
+      /* Result Label Status Colors */
+      .result-label[data-status="correct"] {
+        color: #84cc16;
+      } /* Brighter Green */
+      .result-label[data-status="wrong"] {
+        color: #ef4444;
+      } /* Red */
+      .result-label[data-status="neutral"] {
+        color: #a0aec0;
+      } /* Gray */
+      .result-label[data-status="inactive"] {
+        color: #6b7280;
+      } /* Faded gray for inactive notes */
 
-        /* Scales Fretboard */
-        .fretboard-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 100%;
-            overflow-x: auto; /* Allow horizontal scrolling if needed */
-        }
-        .fret-number-row {
-            display: grid;
-            grid-template-columns: 30px repeat(13, 1fr); /* Match fretboard columns */
-            width: 100%;
-            padding-top: 5px;
-            padding-bottom: 5px;
-            text-align: center;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .fret-number-row .fret-number-cell:first-child {
-            visibility: hidden; /* Hide the first cell to align numbers */
-        }
-        .fretboard {
-            display: grid;
-            grid-template-columns: 30px repeat(13, 1fr); /* 1st column for string label, 13 frets (0-12) */
-            background-color: rgba(0, 0, 0, 0.2); /* Darker transparent for fretboard */
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            min-width: 600px; /* Ensure a minimum width */
-        }
-        .string-label {
-            background-color: rgba(0, 0, 0, 0.3); /* Even darker transparent */
-            color: #e2e8f0;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 4px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.8rem;
-        }
-        .fret {
-            background-color: transparent; /* Fretboard background is the grid */
-            border-right: 2px solid rgba(255, 255, 255, 0.3); /* Fret wire */
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* String separation */
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 0;
-            min-width: 40px;
-            aspect-ratio: 1 / 1;
-        }
-        .fret:first-child { /* Nut position */
-            border-left: 4px solid rgba(255, 255, 255, 0.4); /* Thicker nut line */
-        }
-        .fret:last-child {
-            border-right: none;
-        }
-        .fret-marker {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: rgba(255, 255, 255, 0.4); /* Lighter dot color for contrast */
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-        }
-        /* Double dot marker for 12th fret */
-        .fret-12 { display: flex; flex-direction: column; justify-content: space-around; }
-        .fret-marker-12a, .fret-marker-12b {
-             width: 10px; height: 10px; background-color: rgba(255, 255, 255, 0.4); border-radius: 50%; position: absolute;
-        }
-        .fret-marker-12a { top: 25%; left: 50%; transform: translateX(-50%); }
-        .fret-marker-12b { top: 75%; left: 50%; transform: translateX(-50%); }
+      /* Tuner Visualizer */
+      .tuner-gauge-container {
+        @apply glass-effect rounded-full;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        width: 100%;
+        height: 50px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .tuner-needle {
+        position: absolute;
+        width: 4px;
+        height: 40px;
+        background-color: #f7fafc; /* White needle */
+        border-radius: 9999px;
+        transition: transform 0.1s ease-out; /* Smooth movement */
+        left: 50%;
+        transform: translateX(-50%) rotateZ(0deg); /* Initial position */
+        transform-origin: bottom center;
+        z-index: 10;
+      }
+      .tuner-segment {
+        height: 100%;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: #a0aec0;
+        transition: background-color 0.1s ease-out;
+      }
+      .tuner-segment.flat {
+        background-color: rgba(239, 68, 68, 0.1);
+      }
+      .tuner-segment.sharp {
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+      .tuner-segment.in-tune {
+        background-color: rgba(16, 185, 129, 0.4);
+      }
 
-        .note-dot {
-            width: 28px; height: 28px; background-color: rgba(139, 92, 246, 0.6); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; color: white;
-            font-size: 0.7rem; font-weight: bold; position: relative; z-index: 10;
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4); border: 2px solid rgba(167, 139, 250, 0.7);
-        }
-        .note-dot.root-note {
-            background-color: rgba(239, 68, 68, 0.6); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); border: 2px solid rgba(248, 113, 113, 0.7);
-        }
+      /* Scales Fretboard */
+      .fretboard-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto; /* Allow horizontal scrolling if needed */
+      }
+      .fret-number-row {
+        display: grid;
+        grid-template-columns: 30px repeat(13, 1fr); /* Match fretboard columns */
+        width: 100%;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        text-align: center;
+        color: #e2e8f0;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+      .fret-number-row .fret-number-cell:first-child {
+        visibility: hidden; /* Hide the first cell to align numbers */
+      }
+      .fretboard {
+        display: grid;
+        grid-template-columns: 30px repeat(13, 1fr); /* 1st column for string label, 13 frets (0-12) */
+        background-color: rgba(
+          0,
+          0,
+          0,
+          0.2
+        ); /* Darker transparent for fretboard */
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        min-width: 600px; /* Ensure a minimum width */
+      }
+      .string-label {
+        background-color: rgba(0, 0, 0, 0.3); /* Even darker transparent */
+        color: #e2e8f0;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 4px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.8rem;
+      }
+      .fret {
+        background-color: transparent; /* Fretboard background is the grid */
+        border-right: 2px solid rgba(255, 255, 255, 0.3); /* Fret wire */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* String separation */
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 0;
+        min-width: 40px;
+        aspect-ratio: 1 / 1;
+      }
+      .fret:first-child {
+        /* Nut position */
+        border-left: 4px solid rgba(255, 255, 255, 0.4); /* Thicker nut line */
+      }
+      .fret:last-child {
+        border-right: none;
+      }
+      .fret-marker {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.4
+        ); /* Lighter dot color for contrast */
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+      }
+      /* Double dot marker for 12th fret */
+      .fret-12 {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+      }
+      .fret-marker-12a,
+      .fret-marker-12b {
+        width: 10px;
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        position: absolute;
+      }
+      .fret-marker-12a {
+        top: 25%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .fret-marker-12b {
+        top: 75%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
 
-        /* Chord Diagram Card */
-        .chord-diagram-card {
-            @apply glass-effect p-4 rounded-xl flex flex-col items-center;
-            padding: 10px 15px 15px 0px;
-            border-radius: 16px;
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            min-width: 280px; /* Adjusted min-width for larger diagrams and label */
-        }
-        /* New wrapper to correctly position the fret number label relative to the diagram */
-        .chord-diagram-wrapper-with-label {
-            position: relative;
-            display: flex;
-            align-items: center; /* Vertical center alignment */
-            justify-content: center; /* Horizontal center alignment */
-            width: 280px; /* Consistent width for the wrapper */
-            height: 240px; /* Height of the diagram */
-        }
+      .note-dot {
+        width: 28px;
+        height: 28px;
+        background-color: rgba(139, 92, 246, 0.6);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+        border: 2px solid rgba(167, 139, 250, 0.7);
+      }
+      .note-dot.root-note {
+        background-color: rgba(239, 68, 68, 0.6);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        border: 2px solid rgba(248, 113, 113, 0.7);
+      }
 
-        .chord-fretboard {
-            position: relative;
-            width: 240px; /* Increased size */
-            height: 240px; /* Increased size */
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-left: 40px; /* Explicit margin for the fret number label */
-        }
+      /* Chord Diagram Card */
+      .chord-diagram-card {
+        @apply glass-effect p-4 rounded-xl flex flex-col items-center;
+        padding: 10px 15px 15px 0px;
+        border-radius: 16px;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        min-width: 280px; /* Adjusted min-width for larger diagrams and label */
+      }
+      /* New wrapper to correctly position the fret number label relative to the diagram */
+      .chord-diagram-wrapper-with-label {
+        position: relative;
+        display: flex;
+        align-items: center; /* Vertical center alignment */
+        justify-content: center; /* Horizontal center alignment */
+        width: 280px; /* Consistent width for the wrapper */
+        height: 240px; /* Height of the diagram */
+      }
 
-        .chord-fretboard .string-indicator-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 20px;
-            display: flex; justify-content: space-around; align-items: center; z-index: 3;
-        }
-        .chord-fretboard .string-indicator { font-size: 0.8rem; font-weight: bold; color: #e2e8f0; width: calc(100% / 6); text-align: center; }
-        .chord-fretboard .string-indicator.muted-string { color: #ef4444; }
-        .chord-fretboard .string-indicator.open-string { color: #84cc16; }
+      .chord-fretboard {
+        position: relative;
+        width: 240px; /* Increased size */
+        height: 240px; /* Increased size */
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-left: 40px; /* Explicit margin for the fret number label */
+      }
 
-        .chord-fretboard .fret-line-horizontal {
-            position: absolute; width: 100%; height: 2px; background-color: rgba(255, 255, 255, 0.3); z-index: 1;
-        }
-        .chord-fretboard .string-line-vertical {
-            position: absolute; height: calc(100% - 20px); width: 1px; background-color: rgba(255, 255, 255, 0.4); top: 20px; z-index: 0;
-        }
+      .chord-fretboard .string-indicator-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 3;
+      }
+      .chord-fretboard .string-indicator {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #e2e8f0;
+        width: calc(100% / 6);
+        text-align: center;
+      }
+      .chord-fretboard .string-indicator.muted-string {
+        color: #ef4444;
+      }
+      .chord-fretboard .string-indicator.open-string {
+        color: #84cc16;
+      }
 
-        .chord-fretboard .fret-dot {
-            position: absolute; background-color: rgba(139, 92, 246, 0.6); border-radius: 50%;
-            width: 30px; height: 30px; /* Increased dot size for visibility */
-            display: flex; align-items: center; justify-content: center; color: white;
-            font-size: 0.8rem; font-weight: bold; z-index: 2;
-            transform: translate(-50%, -50%); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-        }
-        .chord-fretboard .fret-dot.root { background-color: rgba(239, 68, 68, 0.6); }
+      .chord-fretboard .fret-line-horizontal {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: rgba(255, 255, 255, 0.3);
+        z-index: 1;
+      }
+      .chord-fretboard .string-line-vertical {
+        position: absolute;
+        height: calc(100% - 20px);
+        width: 1px;
+        background-color: rgba(255, 255, 255, 0.4);
+        top: 20px;
+        z-index: 0;
+      }
 
-        .chord-fretboard .barre-shape {
-            position: absolute; background-color: rgba(255, 255, 255, 0.3); border-radius: 9999px;
-            height: 22px; /* Adjusted height for larger dots */ z-index: 1;
-        }
+      .chord-fretboard .fret-dot {
+        position: absolute;
+        background-color: rgba(139, 92, 246, 0.6);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px; /* Increased dot size for visibility */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 2;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      }
+      .chord-fretboard .fret-dot.root {
+        background-color: rgba(239, 68, 68, 0.6);
+      }
 
-        /* Fret number label on chord diagrams (absolute positioning) */
-        .fret-number-label {
-            position: absolute;
-            left: 0px; /* Position to the very left of the wrapper */
-            color: #cbd5e0;
-            font-size: 0.9rem; /* Slightly larger font */
-            font-weight: bold;
-            text-align: right;
-            width: 30px; /* Give it a fixed width */
-            padding-right: 5px; /* Small padding to separate from diagram */
-            box-sizing: border-box; /* Include padding in width */
-        }
+      .chord-fretboard .barre-shape {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 9999px;
+        height: 22px; /* Adjusted height for larger dots */
+        z-index: 1;
+      }
 
-        /* Microphone Toggle Button */
-        #toggleAudioButton {
-            @apply glass-effect px-8 py-4 font-bold rounded-xl text-xl transition-all duration-300 transform hover:scale-105 active:scale-95 w-full; /* Increased padding and font size */
-            background-color: rgba(16, 185, 129, 0.6); /* Green with transparency */
-            border: 1px solid rgba(16, 185, 129, 0.8);
-            color: white;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            margin-top: 10px;
-        }
-        #toggleAudioButton:hover {
-            background-color: rgba(16, 185, 129, 0.8);
-        }
-        #toggleAudioButton.active {
-            background-color: rgba(239, 68, 68, 0.6); /* Red with transparency when active */
-            border-color: rgba(239, 68, 68, 0.8);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-        #toggleAudioButton.active:hover {
-            background-color: rgba(239, 68, 68, 0.8);
-        }
+      /* Fret number label on chord diagrams (absolute positioning) */
+      .fret-number-label {
+        position: absolute;
+        left: 0px; /* Position to the very left of the wrapper */
+        color: #cbd5e0;
+        font-size: 0.9rem; /* Slightly larger font */
+        font-weight: bold;
+        text-align: right;
+        width: 30px; /* Give it a fixed width */
+        padding-right: 5px; /* Small padding to separate from diagram */
+        box-sizing: border-box; /* Include padding in width */
+      }
 
-        /* Modal specific glass styling */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
-        .modal-content {
-            @apply glass-effect p-8 rounded-xl;
-            background-color: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e2e8f0;
-            max-width: 450px; /* Slightly larger modal */
-            text-align: center;
-        }
-        .modal-content .close-button { color: #e2e8f0; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .modal-content .close-button:hover { color: #cbd5e0; }
-        .modal-content button {
-            @apply glass-effect px-6 py-3 text-lg rounded-lg; /* Increased padding and font size */
-            background-color: rgba(59, 130, 246, 0.5);
-            border: 1px solid rgba(59, 130, 246, 0.7);
-            color: white;
-        }
-        .modal-content button:hover { background-color: rgba(59, 130, 246, 0.7); }
+      /* Microphone Toggle Button */
+      #toggleAudioButton {
+        @apply glass-effect px-8 py-4 font-bold rounded-xl text-xl transition-all duration-300 transform hover:scale-105 active:scale-95 w-full; /* Increased padding and font size */
+        background-color: rgba(16, 185, 129, 0.6); /* Green with transparency */
+        border: 1px solid rgba(16, 185, 129, 0.8);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        margin-top: 10px;
+      }
+      #toggleAudioButton:hover {
+        background-color: rgba(16, 185, 129, 0.8);
+      }
+      #toggleAudioButton.active {
+        background-color: rgba(
+          239,
+          68,
+          68,
+          0.6
+        ); /* Red with transparency when active */
+        border-color: rgba(239, 68, 68, 0.8);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+      }
+      #toggleAudioButton.active:hover {
+        background-color: rgba(239, 68, 68, 0.8);
+      }
 
-        /* Ensure main title does not shift */
-        h1 {
-            width: 100%; /* Ensure it takes full width of its container */
-            text-align: center;
-            margin-bottom: 1.5rem; /* Consistent bottom margin */
-        }
+      /* Modal specific glass styling */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        @apply glass-effect p-8 rounded-xl;
+        background-color: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #e2e8f0;
+        max-width: 450px; /* Slightly larger modal */
+        text-align: center;
+      }
+      .modal-content .close-button {
+        color: #e2e8f0;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .modal-content .close-button:hover {
+        color: #cbd5e0;
+      }
+      .modal-content button {
+        @apply glass-effect px-6 py-3 text-lg rounded-lg; /* Increased padding and font size */
+        background-color: rgba(59, 130, 246, 0.5);
+        border: 1px solid rgba(59, 130, 246, 0.7);
+        color: white;
+      }
+      .modal-content button:hover {
+        background-color: rgba(59, 130, 246, 0.7);
+      }
+
+      /* Ensure main title does not shift */
+      h1 {
+        width: 100%; /* Ensure it takes full width of its container */
+        text-align: center;
+        margin-bottom: 1.5rem; /* Consistent bottom margin */
+      }
+      /* Styling for the new canvas elements */
+      .debug-graph-container {
+        @apply glass-effect p-4 rounded-xl w-full flex flex-col space-y-4;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        max-width: 600px;
+      }
+      .debug-graph-container canvas {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        width: 100%;
+        height: 120px; /* Fixed height for consistency */
+      }
+      .graph-label {
+        @apply text-sm text-gray-400 text-center mb-2;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="main-container">
-        <h1 class="text-3xl font-bold text-white mb-4">TARBUD</h1>
+      <h1 class="text-3xl font-bold text-white mb-4">TARBUD</h1>
 
-        <!-- Mode Selection Buttons -->
-        <div class="mode-selection flex justify-center gap-4 mb-6 w-full">
-            <button id="trainerModeBtn" class="mode-button">Trainer</button>
-            <button id="tunerModeBtn" class="mode-button">Tuner</button>
-            <button id="scalesModeBtn" class="mode-button">Scales</button>
-            <button id="chordsModeBtn" class="mode-button">Chords</button>
+      <!-- Mode Selection Buttons -->
+      <div class="mode-selection flex justify-center gap-4 mb-6 w-full">
+        <button id="trainerModeBtn" class="mode-button">Trainer</button>
+        <button id="tunerModeBtn" class="mode-button">Tuner</button>
+        <button id="scalesModeBtn" class="mode-button">Scales</button>
+        <button id="chordsModeBtn" class="mode-button">Chords</button>
+      </div>
+
+      <!-- Trainer Mode Section -->
+      <div
+        id="trainerModeSection"
+        class="mode-section w-full flex flex-col items-center space-y-6"
+      >
+        <!-- String Selection Buttons -->
+        <div
+          class="string-buttons flex flex-wrap justify-center gap-3 mb-4 w-full max-w-xl"
+        >
+          <!-- Buttons will be dynamically added here by JavaScript -->
         </div>
 
-        <!-- Trainer Mode Section -->
-        <div id="trainerModeSection" class="mode-section w-full flex flex-col items-center space-y-6">
-            <!-- String Selection Buttons -->
-            <div class="string-buttons flex flex-wrap justify-center gap-3 mb-4 w-full max-w-xl">
-                <!-- Buttons will be dynamically added here by JavaScript -->
-            </div>
-
-            <!-- Main Note Display -->
-            <div class="w-full glass-effect p-8 rounded-xl">
-                <p id="trainerNoteLabel" class="text-7xl font-extrabold text-blue-300 text-center uppercase tracking-wide transition-colors duration-200">E2</p>
-            </div>
-
-            <!-- Result Feedback -->
-            <div class="w-full glass-effect p-6 rounded-xl">
-                <p id="trainerResultLabel" class="text-2xl font-semibold text-gray-300 text-center h-8" data-status="neutral"></p>
-            </div>
-
-            <!-- Debug Info -->
-            <div class="w-full glass-effect p-4 rounded-xl">
-                <p id="trainerDebugLabel" class="text-sm text-gray-400 text-center h-5"></p>
-            </div>
+        <!-- Main Note Display -->
+        <div class="w-full glass-effect p-8 rounded-xl">
+          <p
+            id="trainerNoteLabel"
+            class="text-7xl font-extrabold text-blue-300 text-center uppercase tracking-wide transition-colors duration-200"
+          >
+            E2
+          </p>
         </div>
 
-        <!-- Tuner Mode Section -->
-        <div id="tunerModeSection" class="mode-section w-full flex-col items-center space-y-6 hidden">
-            <!-- Main Tuner Note Display -->
-            <div class="w-full glass-effect p-8 rounded-xl">
-                <p id="tunerNoteLabel" class="text-7xl font-extrabold text-blue-300 text-center uppercase tracking-wide transition-colors duration-200">--</p>
-                <!-- Added a fixed height to prevent layout shifts -->
-                <p id="tunerOctaveLabel" class="text-3xl font-bold text-gray-300 text-center -mt-4 h-10"></p>
-            </div>
-
-            <!-- Tuner Visualizer -->
-            <div class="glass-effect w-full tuner-gauge-container relative flex items-center justify-center">
-                <!-- Segments for visual feedback -->
-                <div class="tuner-segment absolute left-0 w-1/4 h-full rounded-l-full" style="background-color: rgba(239, 68, 68, 0.1);"></div> <!-- Flat -->
-                <div class="tuner-segment absolute left-1/4 w-1/4 h-full" style="background-color: rgba(251, 191, 36, 0.1);"></div> <!-- Slightly Flat -->
-                <div class="tuner-segment absolute w-1/12 h-full rounded-full flex items-center justify-center text-green-400 font-bold" style="background-color: rgba(16, 185, 129, 0.4); z-index: 5;">
-                    <svg class="h-6 w-6 text-green-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                </div> <!-- In Tune (Middle) -->
-                <div class="tuner-segment absolute right-1/4 w-1/4 h-full" style="background-color: rgba(59, 130, 246, 0.1);"></div> <!-- Slightly Sharp -->
-                <div class="tuner-segment absolute right-0 w-1/4 h-full rounded-r-full" style="background-color: rgba(99, 102, 241, 0.1);"></div> <!-- Sharp -->
-
-                <div id="tunerNeedle" class="tuner-needle"></div>
-            </div>
-
-            <!-- Cent Display -->
-            <p id="tunerCentsLabel" class="text-3xl font-bold text-gray-300 text-center mt-2 h-10">0 cents</p>
-             <!-- Tuner Debug Info -->
-            <div class="w-full glass-effect p-4 rounded-xl">
-                <p id="tunerDebugLabel" class="text-sm text-gray-400 text-center h-5"></p>
-            </div>
+        <!-- Result Feedback -->
+        <div class="w-full glass-effect p-6 rounded-xl">
+          <p
+            id="trainerResultLabel"
+            class="text-2xl font-semibold text-gray-300 text-center h-8"
+            data-status="neutral"
+          ></p>
         </div>
 
-        <!-- Scale Practice Mode Section -->
-        <div id="scalesModeSection" style="overflow: hidden;" class="rounded-xl mode-section w-full flex flex-col items-center space-y-6 hidden">
-            <!-- Controls for Key and Scale/Mode -->
-            <div class="flex flex-wrap justify-center gap-4 mb-4 p-4 glass-effect w-full max-w-lg">
-                <div class="flex flex-col items-center flex-1 min-w-[120px]">
-                    <label for="keySelect" class="text-gray-300 text-sm mb-1">Key</label>
-                    <select id="keySelect" class="glass-effect text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <!-- Options filled by JS -->
-                    </select>
-                </div>
-                <div class="flex flex-col items-center flex-1 min-w-[120px]">
-                    <label for="scaleSelect" class="text-gray-300 text-sm mb-1">Scale / Mode</label>
-                    <select id="scaleSelect" class="glass-effect text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <!-- Options filled by JS -->
-                    </select>
-                </div>
-            </div>
-            <div class="fretboard-wrapper rounded-xl overflow-hidden w-full max-w-4xl">
-                <!-- Fret numbers will be generated here -->
-                <div id="fretNumberRow" class="fret-number-row"></div>
-                <!-- Fretboard Display -->
-                <div id="fretboard" class="fretboard glass-effect w-full max-w-full overflow-x-auto">
-                    <!-- Fretboard content generated by JS -->
-                </div>
-            </div>
-             <p class="text-sm text-gray-100 mt-4 text-center">
-                Highlighted purple notes are part of the scale. Red notes are the root note.
-            </p>
+        <!-- Debug Graphs for Trainer Mode -->
+        <div class="flex debug-graph-container">
+          <p class="graph-label flex items-center">Amplitude</p>
+          <canvas id="trainerAmplitudeCanvas"></canvas>
+          <p class="graph-label flex items-center">Hz</p>
+          <canvas id="trainerFrequencyCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Tuner Mode Section -->
+      <div
+        id="tunerModeSection"
+        class="mode-section w-full flex-col items-center space-y-6 hidden"
+      >
+        <!-- Main Tuner Note Display -->
+        <div class="w-full glass-effect p-8 rounded-xl">
+          <p
+            id="tunerNoteLabel"
+            class="text-7xl font-extrabold text-blue-300 text-center uppercase tracking-wide transition-colors duration-200"
+          >
+            --
+          </p>
+          <!-- Added a fixed height to prevent layout shifts -->
+          <p
+            id="tunerOctaveLabel"
+            class="text-3xl font-bold text-gray-300 text-center -mt-4 h-10"
+          ></p>
         </div>
 
-        <!-- Chord Dictionary Mode Section -->
-        <div id="chordsModeSection" class="mode-section w-full flex flex-col items-center space-y-6 hidden">
-            <div class="flex flex-wrap justify-center gap-4 mb-4 p-4 glass-effect w-full max-w-lg">
-                <div class="flex flex-col items-center flex-1 min-w-[120px]">
-                    <label for="chordRootSelect" class="text-gray-300 text-sm mb-1">Root Note</label>
-                    <select id="chordRootSelect" class="w-full glass-effect p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <!-- Options filled by JS -->
-                    </select>
-                </div>
-                <div class="flex flex-col items-center flex-1 min-w-[120px]">
-                    <label for="chordTypeSelect" class="text-gray-300 text-sm mb-1">Chord Type</label>
-                    <select id="chordTypeSelect" class="w-full glass-effect p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <!-- Options filled by JS -->
-                    </select>
-                </div>
-            </div>
+        <!-- Tuner Visualizer -->
+        <div
+          class="glass-effect w-full tuner-gauge-container relative flex items-center justify-center"
+        >
+          <!-- Segments for visual feedback -->
+          <div
+            class="tuner-segment absolute left-0 w-1/4 h-full rounded-l-full"
+            style="background-color: rgba(239, 68, 68, 0.1)"
+          ></div>
+          <!-- Flat -->
+          <div
+            class="tuner-segment absolute left-1/4 w-1/4 h-full"
+            style="background-color: rgba(251, 191, 36, 0.1)"
+          ></div>
+          <!-- Slightly Flat -->
+          <div
+            class="tuner-segment absolute w-1/12 h-full rounded-full flex items-center justify-center text-green-400 font-bold"
+            style="background-color: rgba(16, 185, 129, 0.4); z-index: 5"
+          >
+            <svg
+              class="h-6 w-6 text-green-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+          </div>
+          <!-- In Tune (Middle) -->
+          <div
+            class="tuner-segment absolute right-1/4 w-1/4 h-full"
+            style="background-color: rgba(59, 130, 246, 0.1)"
+          ></div>
+          <!-- Slightly Sharp -->
+          <div
+            class="tuner-segment absolute right-0 w-1/4 h-full rounded-r-full"
+            style="background-color: rgba(99, 102, 241, 0.1)"
+          ></div>
+          <!-- Sharp -->
 
-            <!-- Chord Progression Generator Section -->
-            <div class="w-full glass-effect p-6 rounded-xl flex flex-col items-center space-y-4">
-                <h3 class="text-xl font-bold text-white">✨ Chord Progression Generator</h3>
-                <input type="text" id="moodInput" placeholder="e.g., Happy, Blues, Melancholy" class="w-full max-w-md glass-effect p-3 rounded-lg">
-                <button id="generateProgressionBtn" class="glass-effect px-6 py-3 text-lg font-bold rounded-xl hover:bg-blue-700 text-white shadow-md transition-all duration-200 transform hover:scale-105">
-                    Generate Progression ✨
-                </button>
-                <div id="progressionOutput" class="w-full text-center text-gray-300 text-sm italic min-h-[50px] flex items-center justify-center p-4 glass-effect">
-                    Your generated progression will appear here.
-                </div>
-            </div>
-
-            <!-- Existing: Chord Diagrams Container -->
-            <div id="chordDiagramsContainer" class="w-full flex flex-wrap justify-center gap-4 mt-6">
-                <!-- Chord diagrams will be generated here -->
-            </div>
-             <p class="text-sm text-gray-400 mt-4 text-center">
-                Blue dots represent chord notes. Red dots represent the root note of the chord.
-                'X' above a string means mute, 'O' means open string.
-                Fret numbers will appear on the left for chords starting on a fret higher than 0.
-            </p>
+          <div id="tunerNeedle" class="tuner-needle"></div>
         </div>
 
-
-        <!-- Universal Start/Stop Button (applies to Trainer/Tuner) -->
-         <div class="btn-container w-full flex justify-center">
-             
-             <button id="toggleAudioButton" class="glass-effect px-8 py-4 font-bold rounded-xl text-xl transition-all duration-300 transform active:scale-95">
-                 Start Microphone
-                </button>
-            </div>
+        <!-- Cent Display -->
+        <p
+          id="tunerCentsLabel"
+          class="text-3xl font-bold text-gray-300 text-center mt-2 h-10"
+        >
+          0 cents
+        </p>
+        <!-- Debug Graphs for Tuner Mode -->
+        <div class="debug-graph-container hidden">
+          <p class="graph-label">A/T</p>
+          <canvas id="tunerAmplitudeCanvas"></canvas>
+          <p class="graph-label">Frequency Spectrum</p>
+          <canvas id="tunerFrequencyCanvas"></canvas>
         </div>
+      </div>
+
+      <!-- Scale Practice Mode Section -->
+      <div
+        id="scalesModeSection"
+        style="overflow: hidden"
+        class="rounded-xl mode-section w-full flex flex-col items-center space-y-6 hidden"
+      >
+        <!-- Controls for Key and Scale/Mode -->
+        <div
+          class="flex flex-wrap justify-center gap-4 mb-4 p-4 glass-effect w-full max-w-lg"
+        >
+          <div class="flex flex-col items-center flex-1 min-w-[120px]">
+            <label for="keySelect" class="text-gray-300 text-sm mb-1"
+              >Key</label
+            >
+            <select
+              id="keySelect"
+              class="glass-effect text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <!-- Options filled by JS -->
+            </select>
+          </div>
+          <div class="flex flex-col items-center flex-1 min-w-[120px]">
+            <label for="scaleSelect" class="text-gray-300 text-sm mb-1"
+              >Scale / Mode</label
+            >
+            <select
+              id="scaleSelect"
+              class="glass-effect text-white p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <!-- Options filled by JS -->
+            </select>
+          </div>
+        </div>
+        <div
+          class="fretboard-wrapper rounded-xl overflow-hidden w-full max-w-4xl"
+        >
+          <!-- Fret numbers will be generated here -->
+          <div id="fretNumberRow" class="fret-number-row"></div>
+          <!-- Fretboard Display -->
+          <div
+            id="fretboard"
+            class="fretboard glass-effect w-full max-w-full overflow-x-auto"
+          >
+            <!-- Fretboard content generated by JS -->
+          </div>
+        </div>
+        <p class="text-sm text-gray-100 mt-4 text-center">
+          Highlighted purple notes are part of the scale. Red notes are the root
+          note.
+        </p>
+      </div>
+
+      <!-- Chord Dictionary Mode Section -->
+      <div
+        id="chordsModeSection"
+        class="mode-section w-full flex flex-col items-center space-y-6 hidden"
+      >
+        <div
+          class="flex flex-wrap justify-center gap-4 mb-4 p-4 glass-effect w-full max-w-lg"
+        >
+          <div class="flex flex-col items-center flex-1 min-w-[120px]">
+            <label for="chordRootSelect" class="text-gray-300 text-sm mb-1"
+              >Root Note</label
+            >
+            <select
+              id="chordRootSelect"
+              class="w-full glass-effect p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <!-- Options filled by JS -->
+            </select>
+          </div>
+          <div class="flex flex-col items-center flex-1 min-w-[120px]">
+            <label for="chordTypeSelect" class="text-gray-300 text-sm mb-1"
+              >Chord Type</label
+            >
+            <select
+              id="chordTypeSelect"
+              class="w-full glass-effect p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <!-- Options filled by JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Chord Progression Generator Section -->
+        <div
+          class="w-full glass-effect p-6 rounded-xl flex flex-col items-center space-y-4"
+        >
+          <h3 class="text-xl font-bold text-white">
+            ✨ Chord Progression Generator
+          </h3>
+          <input
+            type="text"
+            id="moodInput"
+            placeholder="e.g., Happy, Blues, Melancholy"
+            class="w-full max-w-md glass-effect p-3 rounded-lg"
+          />
+          <button
+            id="generateProgressionBtn"
+            class="glass-effect px-6 py-3 text-lg font-bold rounded-xl hover:bg-blue-700 text-white shadow-md transition-all duration-200 transform hover:scale-105"
+          >
+            Generate Progression ✨
+          </button>
+          <div
+            id="progressionOutput"
+            class="w-full text-center text-gray-300 text-sm italic min-h-[50px] flex items-center justify-center p-4 glass-effect"
+          >
+            Your generated progression will appear here.
+          </div>
+        </div>
+
+        <!-- Existing: Chord Diagrams Container -->
+        <div
+          id="chordDiagramsContainer"
+          class="w-full flex flex-wrap justify-center gap-4 mt-6"
+        >
+          <!-- Chord diagrams will be generated here -->
+        </div>
+        <p class="text-sm text-gray-400 mt-4 text-center">
+          Blue dots represent chord notes. Red dots represent the root note of
+          the chord. 'X' above a string means mute, 'O' means open string. Fret
+          numbers will appear on the left for chords starting on a fret higher
+          than 0.
+        </p>
+      </div>
+
+      <!-- Universal Start/Stop Button (applies to Trainer/Tuner) -->
+      <div class="btn-container w-full flex justify-center">
+        <button
+          id="toggleAudioButton"
+          class="glass-effect px-8 py-4 font-bold rounded-xl text-xl transition-all duration-300 transform active:scale-95"
+        >
+          Start Microphone
+        </button>
+      </div>
+    </div>
 
     <!-- The Modal for permissions -->
     <div id="permissionModal" class="modal">
-        <div class="modal-content glass-effect">
-            <span class="close-button" onclick="document.getElementById('permissionModal').style.display = 'none';">&times;</span>
-            <h2 class="text-xl font-bold mb-4">Microphone Access Required</h2>
-            <p class="text-sm text-gray-400 mb-6">
-                This application needs access to your microphone to detect pitch. Please grant permission when prompted by your browser.
-            </p>
-            <button class="glass-effect px-6 py-3 text-lg rounded-lg" onclick="document.getElementById('permissionModal').style.display = 'none';">
-                Got It!
-            </button>
-        </div>
+      <div class="modal-content glass-effect">
+        <span
+          class="close-button"
+          onclick="document.getElementById('permissionModal').style.display = 'none';"
+          >&times;</span
+        >
+        <h2 class="text-xl font-bold mb-4">Microphone Access Required</h2>
+        <p class="text-sm text-gray-400 mb-6">
+          This application needs access to your microphone to detect pitch.
+          Please grant permission when prompted by your browser.
+        </p>
+        <button
+          class="glass-effect px-6 py-3 text-lg rounded-lg"
+          onclick="document.getElementById('permissionModal').style.display = 'none';"
+        >
+          Got It!
+        </button>
+      </div>
     </div>
 
-
     <script>
-        // --- Global Constants and Utilities ---
-        const STANDARD_TUNING = {
-            "E2": 82.41,
-            "A2": 110.00,
-            "D3": 146.83,
-            "G3": 196.00,
-            "B3": 246.94,
-            "E4": 329.63
-        };
+      // --- Global Constants and Utilities ---
+      const STANDARD_TUNING = {
+        E2: 82.41,
+        A2: 110.0,
+        D3: 146.83,
+        G3: 196.0,
+        B3: 246.94,
+        E4: 329.63,
+      };
 
-        // Note names mapping to MIDI offset (C=0, C#=1, D=2... B=11)
-        const NOTE_NAMES_MIDI_MAP = {
-            'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
-            'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
-        };
-        const NOTE_NAMES = Object.keys(NOTE_NAMES_MIDI_MAP); // ['C', 'C#', ..., 'B']
+      // Note names mapping to MIDI offset (C=0, C#=1, D=2... B=11)
+      const NOTE_NAMES_MIDI_MAP = {
+        C: 0,
+        "C#": 1,
+        D: 2,
+        "D#": 3,
+        E: 4,
+        F: 5,
+        "F#": 6,
+        G: 7,
+        "G#": 8,
+        A: 9,
+        "A#": 10,
+        B: 11,
+      };
+      const NOTE_NAMES = Object.keys(NOTE_NAMES_MIDI_MAP); // ['C', 'C#', ..., 'B']
 
-        const A4_FREQ = 440.0;
-        const CONFIDENCE_THRESHOLD = 0.85; // From Python code
+      const A4_FREQ = 440.0;
+      const CONFIDENCE_THRESHOLD = 0.75; // Adjusted for better detection
 
-        // UI Update Throttling
-        const minUiUpdateIntervalMs = 100; // Minimum interval between UI updates in milliseconds
-        let lastUiUpdateTime = 0;
-        let lastStableDetectedNote = null; // Stores the last confidently detected note
+      // UI Update Throttling
+      const minUiUpdateIntervalMs = 50; // Increased frequency for smoother graph updates
+      let lastUiUpdateTime = 0;
+      let lastStableDetectedNote = null; // Stores the last confidently detected note
 
-        // --- Tuner Utility Functions ---
-        function freqToNoteName(freq) {
-            if (freq <= 0) {
-                return { name: null, octave: null, midiNum: null };
-            }
-            const noteNum = 12 * Math.log2(freq / A4_FREQ) + 69;
-            const noteIndex = Math.round(noteNum) % 12;
-            // The formula `Math.floor(noteNum / 12) - 1` is commonly used for standard MIDI to octave mapping.
-            // A4 (MIDI 69) is in octave 4. So MIDI 60 (C4) is in octave 4.
-            // MIDI 0 (C-1) is octave -1.
-            const octave = Math.floor(noteNum / 12) - 1;
-            const name = NOTE_NAMES[noteIndex];
-            return { name: name, octave: octave, midiNum: Math.round(noteNum) };
+      // Trainer mode specific tolerances
+      const TRAINER_STABILITY_THRESHOLD = 1; // Number of consistent readings before a "correct" or "wrong" judgment (Set to 1 for instant response)
+      const TRAINER_PITCH_TOLERANCE_CENTS = 20; // +/- 20 cents tolerance
+
+      // --- Tuner Utility Functions ---
+      function freqToNoteName(freq) {
+        if (freq <= 0) {
+          return { name: null, octave: null, midiNum: null };
+        }
+        const noteNum = 12 * Math.log2(freq / A4_FREQ) + 69;
+        const noteIndex = Math.round(noteNum) % 12;
+        // The formula `Math.floor(noteNum / 12) - 1` is commonly used for standard MIDI to octave mapping.
+        // A4 (MIDI 69) is in octave 4. So MIDI 60 (C4) is in octave 4.
+        // MIDI 0 (C-1) is octave -1.
+        const octave = Math.floor(noteNum / 12) - 1;
+        const name = NOTE_NAMES[noteIndex];
+        return { name: name, octave: octave, midiNum: Math.round(noteNum) };
+      }
+
+      function getPitchDifference(targetFreq, playedFreq) {
+        if (playedFreq <= 0) {
+          return { semitoneDiff: null, centDiff: null };
+        }
+        const targetMidi = 12 * Math.log2(targetFreq / A4_FREQ) + 69;
+        const playedMidi = 12 * Math.log2(playedFreq / A4_FREQ) + 69;
+
+        const semitoneDiff = Math.round(playedMidi - targetMidi);
+        // Cents are 1/100th of a semitone
+        const centDiff = (playedMidi - targetMidi) * 100;
+
+        return { semitoneDiff, centDiff };
+      }
+
+      function isPitchClose(targetFreq, playedFreq, thresholdCents = 50) {
+        const { centDiff } = getPitchDifference(targetFreq, playedFreq);
+        return centDiff !== null && Math.abs(centDiff) <= thresholdCents;
+      }
+
+      // --- Audio Pitch Stream Class (Autocorrelation based) ---
+      class AudioPitchStream {
+        constructor(callback) {
+          this.callback = callback;
+          this.audioContext = null;
+          this.analyser = null; // AnalyserNode for time and frequency data
+          this.scriptProcessor = null;
+          this.microphone = null;
+          this.running = false;
+
+          this.bufferSize = 2048; // Reverted to 2048 for better balance
+          this.minFreq = 60; // Lowered to capture low E (E2 ~82Hz) better
+          this.maxFreq = 1200; // Increased to cover higher notes
+          this.sampleRate = null; // Will be set by audio context
+          this.noiseFloor = 0.01; // Adjusted for better sensitivity
         }
 
-        function getPitchDifference(targetFreq, playedFreq) {
-            if (playedFreq <= 0) {
-                return { semitoneDiff: null, centDiff: null };
+        // Simple Autocorrelation function for pitch detection
+        detectPitch(buffer) {
+          const sampleRate = this.audioContext.sampleRate;
+          const bufferSize = buffer.length;
+
+          // Simple RMS for confidence (thresholding silence)
+          let sumOfSquares = 0;
+          for (let i = 0; i < bufferSize; i++) {
+            sumOfSquares += buffer[i] * buffer[i];
+          }
+          const rms = Math.sqrt(sumOfSquares / bufferSize);
+
+          if (rms < this.noiseFloor) return { pitch: 0, confidence: 0 }; // Too quiet
+
+          // Normalize buffer
+          const normalizedBuffer = new Float32Array(bufferSize);
+          for (let i = 0; i < bufferSize; i++) {
+            normalizedBuffer[i] = buffer[i] / rms;
+          }
+
+          // Autocorrelation
+          const maxLag = Math.floor(sampleRate / this.minFreq);
+          const minLag = Math.floor(sampleRate / this.maxFreq);
+
+          if (minLag >= maxLag) return { pitch: 0, confidence: 0 };
+
+          let bestLag = -1;
+          let bestCorrelation = -Infinity; // Initialize with negative infinity
+
+          for (let lag = minLag; lag < maxLag; lag++) {
+            let correlation = 0;
+            for (let i = 0; i < bufferSize - lag; i++) {
+              correlation += normalizedBuffer[i] * normalizedBuffer[i + lag];
             }
-            const targetMidi = 12 * Math.log2(targetFreq / A4_FREQ) + 69;
-            const playedMidi = 12 * Math.log2(playedFreq / A4_FREQ) + 69;
 
-            const semitoneDiff = Math.round(playedMidi - targetMidi);
-            // Cents are 1/100th of a semitone
-            const centDiff = (playedMidi - targetMidi) * 100;
+            if (correlation > bestCorrelation) {
+              bestCorrelation = correlation;
+              bestLag = lag;
+            }
+          }
 
-            return { semitoneDiff, centDiff };
+          if (bestLag <= 0) return { pitch: 0, confidence: 0 };
+
+          // Parabolic interpolation for better peak estimation (optional but improves accuracy)
+          // If a better peak exists between bestLag-1 and bestLag+1
+          let x0 = bestLag - 1 >= minLag ? normalizedBuffer[bestLag - 1] : 0;
+          let x1 = normalizedBuffer[bestLag];
+          let x2 = bestLag + 1 < maxLag ? normalizedBuffer[bestLag + 1] : 0;
+          let p = (x2 - x0) / (2 * (2 * x1 - x0 - x2));
+          let interpolatedLag = bestLag + p;
+
+          const detectedPitch = sampleRate / interpolatedLag;
+          // Simple confidence: higher correlation at peak, higher confidence
+          const confidence = Math.max(
+            0,
+            Math.min(1, bestCorrelation * (1.0 / bufferSize) * 2)
+          ); // Scale for visibility
+
+          return { pitch: detectedPitch, confidence: confidence };
         }
 
-        function isPitchClose(targetFreq, playedFreq, thresholdCents = 50) {
-            const { centDiff } = getPitchDifference(targetFreq, playedFreq);
-            return centDiff !== null && Math.abs(centDiff) <= thresholdCents;
+        _audioCallback(audioProcessingEvent) {
+          const inputBuffer = audioProcessingEvent.inputBuffer;
+          const timeDomainData = new Uint8Array(this.analyser.fftSize);
+          this.analyser.getByteTimeDomainData(timeDomainData); // Get waveform data
+
+          const frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
+          this.analyser.getByteFrequencyData(frequencyData); // Get frequency data
+
+          const { pitch, confidence } = this.detectPitch(
+            inputBuffer.getChannelData(0)
+          );
+
+          // Pass all relevant data to the callback
+          this.callback(pitch, confidence, timeDomainData, frequencyData);
         }
 
-        // --- Audio Pitch Stream Class (Autocorrelation based) ---
-        class AudioPitchStream {
-            constructor(callback) {
-                this.callback = callback;
-                this.audioContext = null;
-                this.analyser = null;
-                this.scriptProcessor = null; // Deprecated, but good for quick example
-                this.microphone = null;
-                this.running = false;
+        async start() {
+          if (this.running) {
+            console.log("Audio stream already running.");
+            return;
+          }
 
-                this.bufferSize = 2048; // Must be power of 2: 256, 512, 1024, 2048, 4096, 8192, 16384
-                this.minFreq = 60; // Lowered to capture low E (E2 ~82Hz) better
-                this.maxFreq = 1200; // Increased to cover higher notes
-                this.sampleRate = null; // Will be set by audio context
+          try {
+            if (
+              !navigator.mediaDevices ||
+              !navigator.mediaDevices.getUserMedia
+            ) {
+              console.error("getUserMedia not supported on your browser!");
+              displayMessage(
+                "Error: Microphone access not supported by your browser.",
+                "wrong",
+                "tuner"
+              );
+              return;
             }
 
-            // Simple Autocorrelation function for pitch detection
-            detectPitch(buffer) {
-                const sampleRate = this.audioContext.sampleRate;
-                const bufferSize = buffer.length;
-
-                // Simple RMS for confidence (thresholding silence)
-                let sumOfSquares = 0;
-                for (let i = 0; i < bufferSize; i++) {
-                    sumOfSquares += buffer[i] * buffer[i];
-                }
-                const rms = Math.sqrt(sumOfSquares / bufferSize);
-                const noiseFloor = 0.01; // Adjust as needed
-                if (rms < noiseFloor) return { pitch: 0, confidence: 0 }; // Too quiet
-
-                // Normalize buffer
-                const normalizedBuffer = new Float32Array(bufferSize);
-                for (let i = 0; i < bufferSize; i++) {
-                    normalizedBuffer[i] = buffer[i] / rms;
-                }
-
-                // Autocorrelation
-                const maxLag = Math.floor(sampleRate / this.minFreq);
-                const minLag = Math.floor(sampleRate / this.maxFreq);
-
-                if (minLag >= maxLag) return { pitch: 0, confidence: 0 };
-
-                let bestLag = -1;
-                let bestCorrelation = -Infinity; // Initialize with negative infinity
-
-                for (let lag = minLag; lag < maxLag; lag++) {
-                    let correlation = 0;
-                    for (let i = 0; i < bufferSize - lag; i++) {
-                        correlation += normalizedBuffer[i] * normalizedBuffer[i + lag];
-                    }
-
-                    if (correlation > bestCorrelation) {
-                        bestCorrelation = correlation;
-                        bestLag = lag;
-                    }
-                }
-
-                if (bestLag <= 0) return { pitch: 0, confidence: 0 };
-
-                // Parabolic interpolation for better peak estimation (optional but improves accuracy)
-                // If a better peak exists between bestLag-1 and bestLag+1
-                let x0 = (bestLag - 1 >= minLag) ? normalizedBuffer[bestLag - 1] : 0;
-                let x1 = normalizedBuffer[bestLag];
-                let x2 = (bestLag + 1 < maxLag) ? normalizedBuffer[bestLag + 1] : 0;
-                let p = (x2 - x0) / (2 * (2 * x1 - x0 - x2));
-                let interpolatedLag = bestLag + p;
-
-                const detectedPitch = sampleRate / interpolatedLag;
-                // Simple confidence: higher correlation at peak, higher confidence
-                const confidence = Math.max(0, Math.min(1, bestCorrelation * (1.0 / bufferSize) * 2)); // Scale for visibility
-
-                return { pitch: detectedPitch, confidence: confidence };
-            }
-
-            _audioCallback(audioProcessingEvent) {
-                const inputBuffer = audioProcessingEvent.inputBuffer;
-                const data = inputBuffer.getChannelData(0); // Get mono data
-
-                const { pitch, confidence } = this.detectPitch(data);
-                this.callback(pitch, confidence);
-            }
-
-            async start() {
-                if (this.running) {
-                    console.log("Audio stream already running.");
-                    return;
-                }
-
-                try {
-                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                        console.error('getUserMedia not supported on your browser!');
-                        displayMessage('Error: Microphone access not supported by your browser.', 'wrong', 'tuner');
-                        return;
-                    }
-
-                    document.getElementById('permissionModal').style.display = 'flex';
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    document.getElementById('permissionModal').style.display = 'none';
-
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    this.sampleRate = this.audioContext.sampleRate;
-
-                    this.microphone = this.audioContext.createMediaStreamSource(stream);
-                    this.scriptProcessor = this.audioContext.createScriptProcessor(this.bufferSize, 1, 1);
-                    this.scriptProcessor.onaudioprocess = this._audioCallback.bind(this);
-
-                    this.microphone.connect(this.scriptProcessor);
-                    this.scriptProcessor.connect(this.audioContext.destination);
-
-                    this.running = true;
-                    console.log("Audio stream started.");
-                } catch (err) {
-                    console.error("Failed to start audio stream:", err);
-                    displayMessage(`Error: Could not access microphone. ${err.name}: ${err.message}`, 'wrong', 'tuner');
-                    document.getElementById('permissionModal').style.display = 'none';
-                    this.stop();
-                }
-            }
-
-            stop() {
-                if (!this.running) {
-                    console.log("Audio stream not running.");
-                    return;
-                }
-                if (this.scriptProcessor) {
-                    this.scriptProcessor.disconnect();
-                    this.scriptProcessor.onaudioprocess = null;
-                    this.scriptProcessor = null;
-                }
-                if (this.microphone) {
-                    this.microphone.disconnect();
-                    this.microphone.mediaStream.getTracks().forEach(track => track.stop());
-                    this.microphone = null;
-                }
-                if (this.audioContext) {
-                    this.audioContext.close().then(() => {
-                        this.audioContext = null;
-                        console.log("Audio context closed.");
-                    });
-                }
-                this.running = false;
-                console.log("Audio stream stopped.");
-            }
-        }
-
-        // --- Main Application State and DOM Elements ---
-        let currentMode = "trainer"; // "trainer", "tuner", "scales", "chords"
-
-        // Trainer Mode elements
-        const trainerNoteLabel = document.getElementById("trainerNoteLabel");
-        const trainerResultLabel = document.getElementById("trainerResultLabel");
-        const trainerDebugLabel = document.getElementById("trainerDebugLabel");
-        const stringButtonsContainer = document.querySelector(".string-buttons");
-
-        let selectedString = "E2";
-        let trainerTargetFret = 0;
-        let trainerTargetFreq = STANDARD_TUNING[selectedString];
-        let trainerTargetNote = "E2";
-        let trainerLastFreq = null;
-        let trainerLastNote = "";
-        let trainerSameCount = 0; // Increased stability threshold for Trainer mode
-        const TRAINER_STABILITY_THRESHOLD = 3;
-
-
-        // Tuner Mode elements
-        const tunerNoteLabel = document.getElementById("tunerNoteLabel");
-        const tunerOctaveLabel = document.getElementById("tunerOctaveLabel");
-        const tunerCentsLabel = document.getElementById("tunerCentsLabel");
-        const tunerNeedle = document.getElementById("tunerNeedle");
-        const tunerDebugLabel = document.getElementById("tunerDebugLabel");
-
-        // Scales Mode elements
-        const keySelect = document.getElementById("keySelect");
-        const scaleSelect = document.getElementById("scaleSelect");
-        const fretboardContainer = document.getElementById("fretboard");
-        const fretNumberRow = document.getElementById("fretNumberRow");
-
-        // Chords Mode elements
-        const chordRootSelect = document.getElementById("chordRootSelect");
-        const chordTypeSelect = document.getElementById("chordTypeSelect");
-        const chordDiagramsContainer = document.getElementById("chordDiagramsContainer");
-        // New LLM-related elements
-        const moodInput = document.getElementById("moodInput");
-        const generateProgressionBtn = document.getElementById("generateProgressionBtn");
-        const progressionOutput = document.getElementById("progressionOutput");
-
-
-        // Mode buttons
-        const trainerModeBtn = document.getElementById("trainerModeBtn");
-        const tunerModeBtn = document.getElementById("tunerModeBtn");
-        const scalesModeBtn = document.getElementById("scalesModeBtn");
-        const chordsModeBtn = document.getElementById("chordsModeBtn");
-
-        const toggleAudioButton = document.getElementById("toggleAudioButton");
-
-        let audioStream = null;
-        let isMicrophoneActive = false;
-
-        // --- Scale Definitions ---
-        const SCALES = {
-            "Major": [0, 2, 4, 5, 7, 9, 11],
-            "Minor (Natural)": [0, 2, 3, 5, 7, 8, 10],
-            "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
-            "Melodic Minor (Asc.)": [0, 2, 3, 5, 7, 9, 11],
-            "Major Pentatonic": [0, 2, 4, 7, 9],
-            "Minor Pentatonic": [0, 3, 5, 7, 10],
-            "Ionian (Major)": [0, 2, 4, 5, 7, 9, 11], // Same as Major
-            "Dorian": [0, 2, 3, 5, 7, 9, 10],
-            "Phrygian": [0, 1, 3, 5, 7, 8, 10],
-            "Lydian": [0, 2, 4, 6, 7, 9, 11],
-            "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
-            "Aeolian (Nat. Minor)": [0, 2, 3, 5, 7, 8, 10], // Same as Minor (Natural)
-            "Locrian": [0, 1, 3, 5, 6, 8, 10]
-        };
-
-        const GUITAR_STRING_MIDI_NOTES = {
-            "E4": 64, // High E (index 5 in frets array)
-            "B3": 59, // B (index 4)
-            "G3": 55, // G (index 3)
-            "D3": 50, // D (index 2)
-            "A2": 45, // A (index 1)
-            "E2": 40  // Low E (index 0)
-        };
-        const STRING_ORDER_CHORDS = ["E2", "A2", "D3", "G3", "B3", "E4"]; // Low E to High E for chord diagrams
-
-
-        // --- Chord Definitions (Simplified and Representative) ---
-        // Each chord type has an array of shapes.
-        // Each shape is an object:
-        //   - frets: array of 6 numbers (low E to high E). -1 for mute, 0 for open, >0 for fret number.
-        //   - rootString: the string where the root note of this specific shape is located (e.g., "E2", "A2").
-        //   - templateRootNote: The root note of the *template* chord shape, used for transposition.
-        const CHORD_SHAPES_DATA = {
-            "Major": [
-                { name: "Open C", frets: [-1, 3, 2, 0, 1, 0], rootString: "A2", templateRootNote: "C" },
-                { name: "Open G", frets: [3, 2, 0, 0, 0, 3], rootString: "E2", templateRootNote: "G" },
-                { name: "Open A", frets: [-1, 0, 2, 2, 2, 0], rootString: "A2", templateRootNote: "A" },
-                { name: "Open E", frets: [0, 2, 2, 1, 0, 0], rootString: "E2", templateRootNote: "E" },
-                { name: "Open D", frets: [-1, -1, 0, 2, 3, 2], rootString: "D3", templateRootNote: "D" },
-                // E-shape Barre: Template is F Major starting at 1st fret (root F on E2 string, 1st fret)
-                { name: "E-shape Barre", frets: [1, 3, 3, 2, 1, 1], rootString: "E2", barre: { fret: 1, fromString: 0, toString: 5 }, templateRootNote: "F"},
-                // A-shape Barre: Template is Bb Major starting at 1st fret (root Bb on A2 string, 1st fret)
-                { name: "A-shape Barre", frets: [-1, 1, 3, 3, 3, 1], rootString: "A2", barre: { fret: 1, fromString: 1, toString: 5 }, templateRootNote: "A#"} // Bb is A#
-            ],
-            "Minor": [
-                { name: "Open Am", frets: [-1, 0, 2, 2, 1, 0], rootString: "A2", templateRootNote: "A" },
-                { name: "Open Em", frets: [0, 2, 2, 0, 0, 0], rootString: "E2", templateRootNote: "E" },
-                { name: "E-shape Barre m", frets: [1, 3, 3, 1, 1, 1], rootString: "E2", barre: { fret: 1, fromString: 0, toString: 5 }, templateRootNote: "F"}, // Fm (root F on E2 string, 1st fret)
-                { name: "A-shape Barre m", frets: [-1, 1, 3, 3, 2, 1], rootString: "A2", barre: { fret: 1, fromString: 1, toString: 5 }, templateRootNote: "A#"} // Bbm
-            ],
-            "Dominant 7th": [
-                { name: "Open E7", frets: [0, 2, 0, 1, 0, 0], rootString: "E2", templateRootNote: "E" },
-                { name: "Open A7", frets: [-1, 0, 2, 0, 2, 0], rootString: "A2", templateRootNote: "A" },
-                { name: "E-shape 7", frets: [1, 3, 1, 2, 1, 1], rootString: "E2", barre: { fret: 1, fromString: 0, toString: 5 }, templateRootNote: "F"}, // F7
-            ],
-            "Minor 7th": [
-                { name: "Am7 (Open)", frets: [-1, 0, 2, 0, 1, 0], rootString: "A2", templateRootNote: "A" },
-                { name: "Dm7 (Open)", frets: [-1, -1, 0, 2, 1, 1], rootString: "D3", templateRootNote: "D" },
-                { name: "Em7 (Open)", frets: [0, 2, 2, 0, 3, 0], rootString: "E2", templateRootNote: "E" },
-            ],
-            "Major 7th": [
-                { name: "Cmaj7 (Open)", frets: [-1, 3, 2, 0, 0, 0], rootString: "A2", templateRootNote: "C" },
-                { name: "Gmaj7 (Open)", frets: [3, 2, 0, 0, 0, 2], rootString: "E2", templateRootNote: "G" },
-            ],
-            "Diminished": [
-                 { name: "Cdim7", frets: [-1, 3, 4, 2, 4, -1], rootString: "A2", templateRootNote: "C" },
-            ],
-            "Augmented": [
-                { name: "Caug", frets: [-1, 3, 2, 1, 1, 0], rootString: "A2", templateRootNote: "C" },
-            ],
-            "Suspended 2nd (sus2)": [
-                { name: "Dsus2 (Open)", frets: [-1, -1, 0, 2, 3, 0], rootString: "D3", templateRootNote: "D" },
-                { name: "Asus2 (Open)", frets: [-1, 0, 2, 2, 0, 0], rootString: "A2", templateRootNote: "A" }
-            ],
-            "Suspended 4th (sus4)": [
-                { name: "Dsus4 (Open)", frets: [-1, -1, 0, 2, 3, 3], rootString: "D3", templateRootNote: "D" },
-                { name: "Asus4 (Open)", frets: [-1, 0, 2, 2, 3, 0], rootString: "A2", templateRootNote: "A" }
-            ],
-        };
-
-        // --- General UI Functions ---
-        function switchMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-section').forEach(section => {
-                section.classList.add('hidden');
+            document.getElementById("permissionModal").style.display = "flex";
+            const stream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
             });
-            document.getElementById(`${mode}ModeSection`).classList.remove('hidden');
+            document.getElementById("permissionModal").style.display = "none";
 
-            // Update mode button styles
-            document.querySelectorAll('.mode-button').forEach(button => {
-                button.classList.remove('selected');
-                button.classList.add('glass-effect'); // Ensure glass-effect is always applied by default
+            this.audioContext = new (window.AudioContext ||
+              window.webkitAudioContext)();
+            this.sampleRate = this.audioContext.sampleRate;
+
+            this.microphone = this.audioContext.createMediaStreamSource(stream);
+            this.analyser = this.audioContext.createAnalyser(); // Initialize analyser
+            this.analyser.fftSize = 2048; // Controls the number of frequency bins and time domain samples
+            this.analyser.smoothingTimeConstant = 0.8; // Smooths the frequency data
+
+            this.scriptProcessor = this.audioContext.createScriptProcessor(
+              this.bufferSize,
+              1,
+              1
+            );
+            this.scriptProcessor.onaudioprocess =
+              this._audioCallback.bind(this);
+
+            // Connect the nodes: microphone -> analyser -> scriptProcessor -> destination
+            this.microphone.connect(this.analyser);
+            this.analyser.connect(this.scriptProcessor);
+            this.scriptProcessor.connect(this.audioContext.destination);
+
+            this.running = true;
+            console.log("Audio stream started.");
+          } catch (err) {
+            console.error("Failed to start audio stream:", err);
+            displayMessage(
+              `Error: Could not access microphone. ${err.name}: ${err.message}`,
+              "wrong",
+              "tuner"
+            );
+            document.getElementById("permissionModal").style.display = "none";
+            this.stop();
+          }
+        }
+
+        stop() {
+          if (!this.running) {
+            console.log("Audio stream not running.");
+            return;
+          }
+          if (this.scriptProcessor) {
+            this.scriptProcessor.disconnect();
+            this.scriptProcessor.onaudioprocess = null;
+            this.scriptProcessor = null;
+          }
+          if (this.analyser) {
+            this.analyser.disconnect(); // Disconnect analyser
+            this.analyser = null;
+          }
+          if (this.microphone) {
+            this.microphone.disconnect();
+            this.microphone.mediaStream
+              .getTracks()
+              .forEach((track) => track.stop());
+            this.microphone = null;
+          }
+          if (this.audioContext) {
+            this.audioContext.close().then(() => {
+              this.audioContext = null;
+              console.log("Audio context closed.");
             });
-            document.getElementById(`${mode}ModeBtn`).classList.add('selected'); // Add selected class
+          }
+          this.running = false;
+          console.log("Audio stream stopped.");
+        }
+      }
 
-            // Manage microphone button visibility
-            if (mode === "trainer" || mode === "tuner") {
-                toggleAudioButton.classList.remove('hidden');
-                if (!isMicrophoneActive) {
-                    startMicrophone(); // Auto-start mic if switching to audio-dependent mode and not active
-                }
+      // --- Main Application State and DOM Elements ---
+      let currentMode = "trainer"; // "trainer", "tuner", "scales", "chords"
+
+      // Trainer Mode elements
+      const trainerNoteLabel = document.getElementById("trainerNoteLabel");
+      const trainerResultLabel = document.getElementById("trainerResultLabel");
+      const trainerAmplitudeCanvas = document.getElementById(
+        "trainerAmplitudeCanvas"
+      );
+      const trainerFrequencyCanvas = document.getElementById(
+        "trainerFrequencyCanvas"
+      );
+      let trainerAmpCtx; // Declared globally, initialized in DOMContentLoaded
+      let trainerFreqCtx; // Declared globally, initialized in DOMContentLoaded
+      const stringButtonsContainer = document.querySelector(".string-buttons");
+
+      let selectedString = "E2";
+      let trainerTargetFret = 0;
+      let trainerTargetFreq = STANDARD_TUNING[selectedString];
+      let trainerTargetNote = "E2";
+      let trainerLastFreq = null;
+      let trainerLastNote = "";
+      let trainerSameCount = 0;
+      // TRAINER_STABILITY_THRESHOLD and TRAINER_PITCH_TOLERANCE_CENTS are already declared as global constants.
+      // Removed redundant declarations here to resolve SyntaxError.
+
+      // Tuner Mode elements
+      const tunerNoteLabel = document.getElementById("tunerNoteLabel");
+      const tunerOctaveLabel = document.getElementById("tunerOctaveLabel");
+      const tunerCentsLabel = document.getElementById("tunerCentsLabel");
+      const tunerNeedle = document.getElementById("tunerNeedle");
+      const tunerAmplitudeCanvas = document.getElementById(
+        "tunerAmplitudeCanvas"
+      );
+      const tunerFrequencyCanvas = document.getElementById(
+        "tunerFrequencyCanvas"
+      );
+      let tunerAmpCtx; // Declared globally, initialized in DOMContentLoaded
+      let tunerFreqCtx; // Declared globally, initialized in DOMContentLoaded
+
+      // Scales Mode elements
+      const keySelect = document.getElementById("keySelect");
+      const scaleSelect = document.getElementById("scaleSelect");
+      const fretboardContainer = document.getElementById("fretboard");
+      const fretNumberRow = document.getElementById("fretNumberRow");
+
+      // Chords Mode elements
+      const chordRootSelect = document.getElementById("chordRootSelect");
+      const chordTypeSelect = document.getElementById("chordTypeSelect");
+      const chordDiagramsContainer = document.getElementById(
+        "chordDiagramsContainer"
+      );
+      // New LLM-related elements
+      const moodInput = document.getElementById("moodInput");
+      const generateProgressionBtn = document.getElementById(
+        "generateProgressionBtn"
+      );
+      const progressionOutput = document.getElementById("progressionOutput");
+
+      // Mode buttons
+      const trainerModeBtn = document.getElementById("trainerModeBtn");
+      const tunerModeBtn = document.getElementById("tunerModeBtn");
+      const scalesModeBtn = document.getElementById("scalesModeBtn");
+      const chordsModeBtn = document.getElementById("chordsModeBtn");
+
+      const toggleAudioButton = document.getElementById("toggleAudioButton");
+
+      let audioStream = null;
+      let isMicrophoneActive = false;
+
+      // --- Scale Definitions ---
+      const SCALES = {
+        Major: [0, 2, 4, 5, 7, 9, 11],
+        "Minor (Natural)": [0, 2, 3, 5, 7, 8, 10],
+        "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
+        "Melodic Minor (Asc.)": [0, 2, 3, 5, 7, 9, 11],
+        "Major Pentatonic": [0, 2, 4, 7, 9],
+        "Minor Pentatonic": [0, 3, 5, 7, 10],
+        "Ionian (Major)": [0, 2, 4, 5, 7, 9, 11], // Same as Major
+        Dorian: [0, 2, 3, 5, 7, 9, 10],
+        Phrygian: [0, 1, 3, 5, 7, 8, 10],
+        Lydian: [0, 2, 4, 6, 7, 9, 11],
+        Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+        "Aeolian (Nat. Minor)": [0, 2, 3, 5, 7, 8, 10], // Same as Minor (Natural)
+        Locrian: [0, 1, 3, 5, 6, 8, 10],
+      };
+
+      const GUITAR_STRING_MIDI_NOTES = {
+        E4: 64, // High E (index 5 in frets array)
+        B3: 59, // B (index 4)
+        G3: 55, // G (index 3)
+        D3: 50, // D (index 2)
+        A2: 45, // A (index 1)
+        E2: 40, // Low E (index 0)
+      };
+      const STRING_ORDER_CHORDS = ["E2", "A2", "D3", "G3", "B3", "E4"]; // Low E to High E for chord diagrams
+
+      // Define the target MIDI notes for standard guitar tuning for the tuner filter
+      const STANDARD_GUITAR_TUNING_MIDI_NUMS = new Set([
+        GUITAR_STRING_MIDI_NOTES["E2"], // Low E
+        GUITAR_STRING_MIDI_NOTES["A2"], // A
+        GUITAR_STRING_MIDI_NOTES["D3"], // D
+        GUITAR_STRING_MIDI_NOTES["G3"], // G
+        GUITAR_STRING_MIDI_NOTES["B3"], // B
+        GUITAR_STRING_MIDI_NOTES["E4"], // High E
+      ]);
+
+      // --- Chord Definitions (Simplified and Representative) ---
+      // Each chord type has an array of shapes.
+      // Each shape is an object:
+      //   - frets: array of 6 numbers (low E to high E). -1 for mute, 0 for open, >0 for fret number.
+      //   - rootString: the string where the root note of this specific shape is located (e.g., "E2", "A2").
+      //   - templateRootNote: The root note of the *template* chord shape, used for transposition.
+      const CHORD_SHAPES_DATA = {
+        Major: [
+          {
+            name: "Open C",
+            frets: [-1, 3, 2, 0, 1, 0],
+            rootString: "A2",
+            templateRootNote: "C",
+          },
+          {
+            name: "Open G",
+            frets: [3, 2, 0, 0, 0, 3],
+            rootString: "E2",
+            templateRootNote: "G",
+          },
+          {
+            name: "Open A",
+            frets: [-1, 0, 2, 2, 2, 0],
+            rootString: "A2",
+            templateRootNote: "A",
+          },
+          {
+            name: "Open E",
+            frets: [0, 2, 2, 1, 0, 0],
+            rootString: "E2",
+            templateRootNote: "E",
+          },
+          {
+            name: "Open D",
+            frets: [-1, -1, 0, 2, 3, 2],
+            rootString: "D3",
+            templateRootNote: "D",
+          },
+          // E-shape Barre: Template is F Major starting at 1st fret (root F on E2 string, 1st fret)
+          {
+            name: "E-shape Barre",
+            frets: [1, 3, 3, 2, 1, 1],
+            rootString: "E2",
+            barre: { fret: 1, fromString: 0, toString: 5 },
+            templateRootNote: "F",
+          },
+          // A-shape Barre: Template is Bb Major starting at 1st fret (root Bb on A2 string, 1st fret)
+          {
+            name: "A-shape Barre",
+            frets: [-1, 1, 3, 3, 3, 1],
+            rootString: "A2",
+            barre: { fret: 1, fromString: 1, toString: 5 },
+            templateRootNote: "A#",
+          }, // Bb is A#
+        ],
+        Minor: [
+          {
+            name: "Open Am",
+            frets: [-1, 0, 2, 2, 1, 0],
+            rootString: "A2",
+            templateRootNote: "A",
+          },
+          {
+            name: "Open Em",
+            frets: [0, 2, 2, 0, 0, 0],
+            rootString: "E2",
+            templateRootNote: "E",
+          },
+          {
+            name: "E-shape Barre m",
+            frets: [1, 3, 3, 1, 1, 1],
+            rootString: "E2",
+            barre: { fret: 1, fromString: 0, toString: 5 },
+            templateRootNote: "F",
+          }, // Fm (root F on E2 string, 1st fret)
+          {
+            name: "A-shape Barre m",
+            frets: [-1, 1, 3, 3, 2, 1],
+            rootString: "A2",
+            barre: { fret: 1, fromString: 1, toString: 5 },
+            templateRootNote: "A#",
+          }, // Bbm
+        ],
+        "Dominant 7th": [
+          {
+            name: "Open E7",
+            frets: [0, 2, 0, 1, 0, 0],
+            rootString: "E2",
+            templateRootNote: "E",
+          },
+          {
+            name: "Open A7",
+            frets: [-1, 0, 2, 0, 2, 0],
+            rootString: "A2",
+            templateRootNote: "A",
+          },
+          {
+            name: "E-shape 7",
+            frets: [1, 3, 1, 2, 1, 1],
+            rootString: "E2",
+            barre: { fret: 1, fromString: 0, toString: 5 },
+            templateRootNote: "F",
+          }, // F7
+        ],
+        "Minor 7th": [
+          {
+            name: "Am7 (Open)",
+            frets: [-1, 0, 2, 0, 1, 0],
+            rootString: "A2",
+            templateRootNote: "A",
+          },
+          {
+            name: "Dm7 (Open)",
+            frets: [-1, -1, 0, 2, 1, 1],
+            rootString: "D3",
+            templateRootNote: "D",
+          },
+          {
+            name: "Em7 (Open)",
+            frets: [0, 2, 2, 0, 3, 0],
+            rootString: "E2",
+            templateRootNote: "E",
+          },
+        ],
+        "Major 7th": [
+          {
+            name: "Cmaj7 (Open)",
+            frets: [-1, 3, 2, 0, 0, 0],
+            rootString: "A2",
+            templateRootNote: "C",
+          },
+          {
+            name: "Gmaj7 (Open)",
+            frets: [3, 2, 0, 0, 0, 2],
+            rootString: "E2",
+            templateRootNote: "G",
+          },
+        ],
+        Diminished: [
+          {
+            name: "Cdim7",
+            frets: [-1, 3, 4, 2, 4, -1],
+            rootString: "A2",
+            templateRootNote: "C",
+          },
+        ],
+        Augmented: [
+          {
+            name: "Caug",
+            frets: [-1, 3, 2, 1, 1, 0],
+            rootString: "A2",
+            templateRootNote: "C",
+          },
+        ],
+        "Suspended 2nd (sus2)": [
+          {
+            name: "Dsus2 (Open)",
+            frets: [-1, -1, 0, 2, 3, 0],
+            rootString: "D3",
+            templateRootNote: "D",
+          },
+          {
+            name: "Asus2 (Open)",
+            frets: [-1, 0, 2, 2, 0, 0],
+            rootString: "A2",
+            templateRootNote: "A",
+          },
+        ],
+        "Suspended 4th (sus4)": [
+          {
+            name: "Dsus4 (Open)",
+            frets: [-1, -1, 0, 2, 3, 3],
+            rootString: "D3",
+            templateRootNote: "D",
+          },
+          {
+            name: "Asus4 (Open)",
+            frets: [-1, 0, 2, 2, 3, 0],
+            rootString: "A2",
+            templateRootNote: "A",
+          },
+        ],
+      };
+
+      // --- General UI Functions ---
+      function switchMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll(".mode-section").forEach((section) => {
+          section.classList.add("hidden");
+        });
+        document
+          .getElementById(`${mode}ModeSection`)
+          .classList.remove("hidden");
+
+        // Update mode button styles
+        document.querySelectorAll(".mode-button").forEach((button) => {
+          button.classList.remove("selected");
+          button.classList.add("glass-effect"); // Ensure glass-effect is always applied by default
+        });
+        document.getElementById(`${mode}ModeBtn`).classList.add("selected"); // Add selected class
+
+        // Manage microphone button visibility
+        if (mode === "trainer" || mode === "tuner") {
+          toggleAudioButton.classList.remove("hidden");
+          if (!isMicrophoneActive) {
+            startMicrophone(); // Auto-start mic if switching to audio-dependent mode and not active
+          }
+        } else {
+          toggleAudioButton.classList.add("hidden");
+          stopMicrophone(); // Stop mic if switching to non-audio-dependent mode
+        }
+
+        // Reset UI for other modes when switching
+        if (mode === "trainer") {
+          displayMessage("Click 'Start Microphone' to begin.", "neutral", mode);
+          trainerNoteLabel.textContent = trainerTargetNote;
+        } else if (mode === "tuner") {
+          displayMessage("Click 'Start Microphone' to begin.", "neutral", mode); // Resets tuner display
+          lastStableDetectedNote = null; // Clear last stable note when mode changes
+          tunerNoteLabel.textContent = "--"; // Clear tuner display
+          tunerOctaveLabel.textContent = "";
+          tunerCentsLabel.textContent = "0 cents";
+          tunerNeedle.style.transform = "translateX(-50%) rotateZ(0deg)";
+        } else if (mode === "scales") {
+          drawFretboard();
+        } else if (mode === "chords") {
+          drawChordDiagrams(); // Redraw chords when entering mode
+        }
+      }
+
+      // Generalized display message function for different modes
+      function displayMessage(message, status, mode) {
+        let label;
+        if (mode === "trainer") {
+          label = trainerResultLabel;
+        } else if (mode === "tuner") {
+          // For tuner, the main message is not shown in the text label anymore,
+          // but we still use this function for the tuner needle and note color logic.
+          // We'll rely on the graphs for debug info here.
+          tunerNeedle.style.transform = "translateX(-50%) rotateZ(0deg)"; // Reset needle
+          tunerCentsLabel.textContent = "0 cents"; // Reset cents display
+
+          if (status === "neutral" || status === "inactive") {
+            if (lastStableDetectedNote) {
+              tunerNoteLabel.textContent = lastStableDetectedNote.name;
+              tunerOctaveLabel.textContent = `Octave ${lastStableDetectedNote.octave}`;
+              tunerNoteLabel.classList.remove("text-green-500", "text-red-500");
+              tunerNoteLabel.classList.add("text-blue-300"); // Keep blue while no new confident input
             } else {
-                toggleAudioButton.classList.add('hidden');
-                stopMicrophone(); // Stop mic if switching to non-audio-dependent mode
+              tunerNoteLabel.textContent = "--";
+              tunerOctaveLabel.textContent = "";
+              tunerNoteLabel.classList.remove("text-green-500", "text-red-500");
+              tunerNoteLabel.classList.add("text-blue-300");
             }
+          }
+          // No direct text label to update for tuner.
+          return; // Exit as we don't have a label for tuner anymore.
+        }
+        label.textContent = message;
+        if (label.dataset) {
+          label.dataset.status = status;
+        }
+      }
+// Optimized Audio Visualizer with Amplitude & Frequency Graphs (Glassmorphism Theme)
+// Includes: Exponential smoothing, reduced rendering load, trail effect, and canvas transparency
 
-            // Reset UI for other modes when switching
-            if (mode === "trainer") {
-                 displayMessage("Click 'Start Microphone' to begin.", "neutral", mode);
-                 trainerDebugLabel.textContent = "";
-                 trainerNoteLabel.textContent = trainerTargetNote;
-            } else if (mode === "tuner") {
-                 displayMessage("Click 'Start Microphone' to begin.", "neutral", mode); // Resets tuner display
-                 tunerDebugLabel.textContent = "";
-                 lastStableDetectedNote = null; // Clear last stable note when mode changes
-            } else if (mode === "scales") {
-                 drawFretboard();
-            } else if (mode === "chords") {
-                 drawChordDiagrams(); // Redraw chords when entering mode
-            }
+// Global smoothing memory buffers
+let amplitudeMemory = [];
+let frequencyMemory = [];
+
+// Function to smooth data using exponential moving average
+function exponentialSmooth(data, memoryBuffer, alpha = 0.2) {
+  if (memoryBuffer.length !== data.length) {
+    memoryBuffer = [...data]; // reset buffer if length mismatch
+  }
+  for (let i = 0; i < data.length; i++) {
+    memoryBuffer[i] = alpha * data[i] + (1 - alpha) * (memoryBuffer[i] || data[i]);
+  }
+  return memoryBuffer;
+}
+
+// Function to downsample an array to N evenly spaced values
+function downsample(data, targetLength) {
+  const step = Math.floor(data.length / targetLength);
+  const result = [];
+  for (let i = 0; i < targetLength; i++) {
+    result.push(data[i * step]);
+  }
+  return result;
+}
+
+function drawAmplitudeGraph(canvasCtx, data) {
+  const canvas = canvasCtx.canvas;
+  const width = canvas.width;
+  const height = canvas.height;
+  const centerLine = height / 2;
+  const amplitudeScale = height / 2.8;
+
+  canvasCtx.clearRect(0, 0, width, height);
+  canvasCtx.fillStyle = "rgba(0, 0, 0, 0.05)"; // transparent overlay
+  canvasCtx.fillRect(0, 0, width, height);
+
+  // Static border
+  canvasCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+  canvasCtx.lineWidth = 1;
+  canvasCtx.strokeRect(0, 0, width, height);
+
+  // Horizontal gridlines
+  canvasCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+  canvasCtx.lineWidth = 0.6;
+  for (let i = 0; i < 5; i++) {
+    const y = (height / 4) * i;
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(0, y);
+    canvasCtx.lineTo(width, y);
+    canvasCtx.stroke();
+  }
+
+  const smoothed = exponentialSmooth(data, amplitudeMemory);
+  const visualBins = downsample(smoothed, 128);
+
+  const currentAmplitudeX = width * 0.75;
+  const sliceWidth = (width * 0.75) / visualBins.length;
+
+  const wavePath = new Path2D();
+  let x = 0;
+  let v = (visualBins[0] - 128) / 128;
+  wavePath.moveTo(x, centerLine + v * amplitudeScale);
+
+  for (let i = 0; i < visualBins.length - 1; i++) {
+    const currentX = i * sliceWidth;
+    const currentV = (visualBins[i] - 128) / 128;
+    const currentY = centerLine + currentV * amplitudeScale;
+    const nextV = (visualBins[i + 1] - 128) / 128;
+    const nextY = centerLine + nextV * amplitudeScale;
+    const controlX = currentX + sliceWidth / 2;
+    const controlY = (currentY + nextY) / 2;
+    wavePath.quadraticCurveTo(currentX, currentY, controlX, controlY);
+  }
+
+  const gradient = canvasCtx.createLinearGradient(0, 0, currentAmplitudeX, 0);
+  gradient.addColorStop(0, "hsl(180, 100%, 70%)");
+  gradient.addColorStop(0.25, "hsl(120, 100%, 70%)");
+  gradient.addColorStop(0.5, "hsl(60, 100%, 70%)");
+  gradient.addColorStop(0.75, "hsl(30, 100%, 70%)");
+  gradient.addColorStop(1, "hsl(0, 100%, 70%)");
+
+  canvasCtx.strokeStyle = gradient;
+  canvasCtx.shadowBlur = 15;
+  canvasCtx.shadowColor = "rgba(0, 255, 255, 0.6)";
+  canvasCtx.lineWidth = 3;
+  canvasCtx.stroke(wavePath);
+
+  // Current amplitude dot
+  const currentV = (visualBins[visualBins.length - 1] - 128) / 128;
+  const currentY = centerLine + currentV * amplitudeScale;
+  canvasCtx.beginPath();
+  canvasCtx.arc(currentAmplitudeX, currentY, 5, 0, Math.PI * 2);
+  canvasCtx.fillStyle = "white";
+  canvasCtx.shadowBlur = 10;
+  canvasCtx.shadowColor = "white";
+  canvasCtx.fill();
+  canvasCtx.shadowBlur = 0;
+  canvasCtx.shadowColor = "transparent";
+}
+
+function drawFrequencyGraph(canvasCtx, data, sampleRate, analyser) {
+  const canvas = canvasCtx.canvas;
+  const width = canvas.width;
+  const height = canvas.height;
+  canvasCtx.clearRect(0, 0, width, height);
+  canvasCtx.fillStyle = "rgba(0, 0, 0, 0.05)"; // transparent overlay
+  canvasCtx.fillRect(0, 0, width, height);
+  canvasCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+  canvasCtx.strokeRect(0, 0, width, height);
+
+  const MIN_DISPLAY_FREQ = 40;
+  const MAX_DISPLAY_FREQ = 12000;
+  const binResolution = sampleRate / analyser.fftSize;
+  const startIdx = Math.floor(MIN_DISPLAY_FREQ / binResolution);
+  const endIdx = Math.ceil(MAX_DISPLAY_FREQ / binResolution);
+
+  const relevantData = data.slice(startIdx, endIdx);
+  const smoothed = exponentialSmooth(relevantData, frequencyMemory);
+  const visualBins = downsample(smoothed, 128);
+
+  const stepX = width / visualBins.length;
+  canvasCtx.beginPath();
+  let v = visualBins[0] / 255;
+  canvasCtx.moveTo(0, height - v * height);
+
+  for (let i = 1; i < visualBins.length; i++) {
+    const x = i * stepX;
+    const v = visualBins[i] / 255;
+    const y = height - v * height;
+    canvasCtx.lineTo(x, y);
+  }
+
+  const gradient = canvasCtx.createLinearGradient(0, 0, width, 0);
+  gradient.addColorStop(0, "hsl(180, 100%, 70%)");
+  gradient.addColorStop(0.25, "hsl(120, 100%, 70%)");
+  gradient.addColorStop(0.5, "hsl(60, 100%, 70%)");
+  gradient.addColorStop(0.75, "hsl(30, 100%, 70%)");
+  gradient.addColorStop(1, "hsl(0, 100%, 70%)");
+
+  canvasCtx.strokeStyle = gradient;
+  canvasCtx.shadowBlur = 15;
+  canvasCtx.shadowColor = "rgba(0, 255, 255, 0.6)";
+  canvasCtx.lineWidth = 3;
+  canvasCtx.stroke();
+  canvasCtx.shadowBlur = 0;
+  canvasCtx.shadowColor = "transparent";
+}
+      // --- Trainer Mode Functions ---
+      function setupStringButtons() {
+        Object.keys(STANDARD_TUNING).forEach((stringName) => {
+          const btn = document.createElement("button");
+          btn.textContent = stringName;
+          // Apply base glass-effect and hover, 'selected' will override
+          btn.className = "string-button glass-effect";
+          btn.dataset.stringName = stringName; // Store string name in dataset
+          btn.addEventListener("click", () => changeString(stringName));
+          stringButtonsContainer.appendChild(btn);
+        });
+        updateStringButtonSelection(); // Set initial selected state
+      }
+
+      function updateStringButtonSelection(oldSelectedString = null) {
+        if (oldSelectedString) {
+          const oldBtn = document.querySelector(
+            `.string-button[data-string-name="${oldSelectedString}"]`
+          );
+          if (oldBtn) {
+            oldBtn.classList.remove("selected");
+          }
         }
 
-        // Generalized display message function for different modes
-        function displayMessage(message, status, mode) {
-            let label;
-            if (mode === 'trainer') {
-                label = trainerResultLabel;
-            } else if (mode === 'tuner') {
-                label = tunerDebugLabel;
-                // For tuner, special handling to show last stable note
-                if (status === 'neutral' || status === 'inactive') {
-                    if (lastStableDetectedNote) {
-                        tunerNoteLabel.textContent = lastStableDetectedNote.name;
-                        tunerOctaveLabel.textContent = `Octave ${lastStableDetectedNote.octave}`;
-                        tunerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                        tunerNoteLabel.classList.add('text-blue-300'); // Keep blue while no new confident input
-                    } else {
-                        tunerNoteLabel.textContent = '--';
-                        tunerOctaveLabel.textContent = '';
-                        tunerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                        tunerNoteLabel.classList.add('text-blue-300');
-                    }
-                    tunerCentsLabel.textContent = '0 cents';
-                    tunerNeedle.style.transform = 'translateX(-50%) rotateZ(0deg)';
-                }
-            }
-            label.textContent = message;
-            if (label.dataset) {
-                label.dataset.status = status;
-            }
+        const currentBtn = document.querySelector(
+          `.string-button[data-string-name="${selectedString}"]`
+        );
+        if (currentBtn) {
+          currentBtn.classList.add("selected");
+        }
+      }
+
+      function changeString(newStringName) {
+        const oldString = selectedString;
+        selectedString = newStringName;
+        setNextTargetTrainer();
+        displayMessage("", "neutral", "trainer");
+        trainerSameCount = 0;
+        updateStringButtonSelection(oldString);
+      }
+
+      function setNextTargetTrainer() {
+        trainerTargetFret = Math.floor(Math.random() * 13); // Random fret from 0 to 12
+        const baseFreq = STANDARD_TUNING[selectedString];
+        trainerTargetFreq = baseFreq * 2 ** (trainerTargetFret / 12);
+        const { name, octave } = freqToNoteName(trainerTargetFreq);
+        trainerTargetNote = `${name}${octave}`;
+        trainerNoteLabel.textContent = trainerTargetNote;
+        trainerNoteLabel.classList.add("text-blue-300");
+        trainerNoteLabel.classList.remove("text-green-500", "text-red-500");
+      }
+
+      function processAudioTrainer(
+        pitch,
+        confidence,
+        timeDomainData,
+        frequencyData
+      ) {
+        const now = Date.now();
+        const shouldUpdateImmediately =
+          now - lastUiUpdateTime > minUiUpdateIntervalMs;
+
+        // Draw graphs regardless of confidence, but throttle for performance
+        if (shouldUpdateImmediately && audioStream && audioStream.analyser) {
+          drawAmplitudeGraph(trainerAmpCtx, timeDomainData);
+          drawFrequencyGraph(
+            trainerFreqCtx,
+            frequencyData,
+            audioStream.sampleRate,
+            audioStream.analyser
+          );
         }
 
-
-        // --- Trainer Mode Functions ---
-        function setupStringButtons() {
-            Object.keys(STANDARD_TUNING).forEach(stringName => {
-                const btn = document.createElement("button");
-                btn.textContent = stringName;
-                // Apply base glass-effect and hover, 'selected' will override
-                btn.className = "string-button glass-effect";
-                btn.dataset.stringName = stringName; // Store string name in dataset
-                btn.addEventListener("click", () => changeString(stringName));
-                stringButtonsContainer.appendChild(btn);
-            });
-            updateStringButtonSelection(); // Set initial selected state
+        if (confidence < CONFIDENCE_THRESHOLD) {
+          if (
+            shouldUpdateImmediately ||
+            trainerResultLabel.textContent !== "Low confidence. Play clearer."
+          ) {
+            displayMessage(
+              "Low confidence. Play clearer.",
+              "neutral",
+              "trainer"
+            );
+            trainerNoteLabel.classList.add("text-blue-300"); // Ensure blue if low confidence
+            trainerNoteLabel.classList.remove("text-green-500", "text-red-500");
+            lastUiUpdateTime = now;
+          }
+          trainerSameCount = 0; // Reset counter if confidence is too low
+          return;
+        } else if (pitch <= 0) {
+          if (
+            shouldUpdateImmediately ||
+            trainerResultLabel.textContent !== "No pitch detected"
+          ) {
+            displayMessage("No pitch detected", "neutral", "trainer");
+            trainerNoteLabel.classList.add("text-blue-300"); // Ensure blue if no pitch
+            trainerNoteLabel.classList.remove("text-green-500", "text-red-500");
+            lastUiUpdateTime = now;
+          }
+          trainerSameCount = 0; // Reset counter if no pitch is detected
+          return;
         }
 
-        function updateStringButtonSelection(oldSelectedString = null) {
-            if (oldSelectedString) {
-                const oldBtn = document.querySelector(`.string-button[data-string-name="${oldSelectedString}"]`);
-                if (oldBtn) {
-                    oldBtn.classList.remove("selected");
-                }
+        const { semitoneDiff, centDiff } = getPitchDifference(
+          trainerTargetFreq,
+          pitch
+        );
+        const { name: detectedNoteName, octave: detectedOctave } =
+          freqToNoteName(pitch);
+        const fullDetectedNote = `${detectedNoteName}${detectedOctave}`;
+
+        const freqTolerance = 1.0; // Allow small freq variation for same-note detection
+        if (
+          trainerLastNote === fullDetectedNote &&
+          Math.abs(pitch - (trainerLastFreq || 0)) < freqTolerance
+        ) {
+          trainerSameCount++;
+        } else {
+          trainerSameCount = 1; // Reset to 1 if it's a new note or significant freq change, count this as the first stable detection
+        }
+
+        trainerLastFreq = pitch;
+        trainerLastNote = fullDetectedNote;
+
+        // Only update main feedback and potentially trigger next target after sufficient stability
+        if (trainerSameCount >= TRAINER_STABILITY_THRESHOLD) {
+          // TRAINER_STABILITY_THRESHOLD is now 1
+          // If the detected note is the target note AND it's within pitch tolerance
+          if (
+            fullDetectedNote === trainerTargetNote &&
+            isPitchClose(
+              trainerTargetFreq,
+              pitch,
+              TRAINER_PITCH_TOLERANCE_CENTS
+            )
+          ) {
+            // Check if the current message is already "Correct!" to avoid unnecessary DOM writes
+            if (trainerResultLabel.dataset.status !== "correct") {
+              // Simpler check
+              displayMessage(
+                `✅ Correct! ${fullDetectedNote}`,
+                "correct",
+                "trainer"
+              );
+              trainerNoteLabel.classList.remove(
+                "text-blue-300",
+                "text-red-500"
+              );
+              trainerNoteLabel.classList.add("text-green-500");
+              setNextTargetTrainer(); // Get a new target note
+              trainerSameCount = 0; // Reset for the new target
+              lastUiUpdateTime = now;
+            }
+          } else {
+            // Detected a stable note, but it's either not the target or not in tune
+            const targetNoteIsWrong = fullDetectedNote !== trainerTargetNote;
+            const pitchIsOff = !isPitchClose(
+              trainerTargetFreq,
+              pitch,
+              TRAINER_PITCH_TOLERANCE_CENTS
+            );
+
+            let feedbackMessage = "";
+            let feedbackStatus = "wrong"; // Default to wrong
+
+            if (targetNoteIsWrong) {
+              feedbackMessage = `❌ Detected ${fullDetectedNote}. Target is ${trainerTargetNote}.`;
+            } else if (pitchIsOff) {
+              const direction = centDiff > 0 ? "Sharp" : "Flat";
+              feedbackMessage = `❌ Too ${direction} by ${Math.abs(
+                centDiff
+              ).toFixed(0)} cents (${fullDetectedNote})`;
             }
 
-            const currentBtn = document.querySelector(`.string-button[data-string-name="${selectedString}"]`);
-            if (currentBtn) {
-                currentBtn.classList.add("selected");
+            if (
+              shouldUpdateImmediately ||
+              trainerResultLabel.textContent !== feedbackMessage
+            ) {
+              displayMessage(feedbackMessage, feedbackStatus, "trainer");
+              trainerNoteLabel.classList.remove(
+                "text-blue-300",
+                "text-green-500"
+              );
+              trainerNoteLabel.classList.add("text-red-500");
+              lastUiUpdateTime = now;
             }
+          }
+        } else if (shouldUpdateImmediately) {
+          // Update "Detecting..." message periodically if not stable
+          // More helpful message for trainer mode
+          displayMessage(
+            `Detecting... Try to play ${trainerTargetNote}`,
+            "neutral",
+            "trainer"
+          );
+          trainerNoteLabel.classList.add("text-blue-300"); // Keep blue while detecting
+          trainerNoteLabel.classList.remove("text-green-500", "text-red-500");
+          lastUiUpdateTime = now;
+        }
+      }
+
+      // --- Tuner Mode Functions ---
+      function processAudioTuner(
+        pitch,
+        confidence,
+        timeDomainData,
+        frequencyData
+      ) {
+        const now = Date.now();
+        const shouldUpdateImmediately =
+          now - lastUiUpdateTime > minUiUpdateIntervalMs;
+
+        // Draw graphs regardless of confidence, but throttle for performance
+        if (shouldUpdateImmediately && audioStream && audioStream.analyser) {
+          drawAmplitudeGraph(tunerAmpCtx, timeDomainData);
+          drawFrequencyGraph(
+            tunerFreqCtx,
+            frequencyData,
+            audioStream.sampleRate,
+            audioStream.analyser
+          );
         }
 
-        function changeString(newStringName) {
-            const oldString = selectedString;
-            selectedString = newStringName;
-            setNextTargetTrainer();
-            displayMessage("", "neutral", 'trainer');
-            trainerDebugLabel.textContent = "";
-            trainerSameCount = 0;
-            updateStringButtonSelection(oldString);
+        if (confidence < CONFIDENCE_THRESHOLD) {
+          tunerCentsLabel.textContent = "Too quiet / No pitch";
+          tunerCentsLabel.dataset.status = "inactive";
+          tunerNoteLabel.textContent = "--"; // Clear note display for low confidence
+          tunerOctaveLabel.textContent = "";
+          tunerNoteLabel.classList.remove("text-green-500", "text-red-500");
+          tunerNoteLabel.classList.add("text-blue-300");
+          tunerNeedle.style.transform = "translateX(-50%) rotateZ(0deg)";
+          lastUiUpdateTime = now; // Only update time if actual UI changes
+          return;
+        } else if (pitch <= 0) {
+          tunerCentsLabel.textContent = "No pitch detected";
+          tunerCentsLabel.dataset.status = "inactive";
+          tunerNoteLabel.textContent = "--"; // Clear note display for no pitch
+          tunerOctaveLabel.textContent = "";
+          tunerNoteLabel.classList.remove("text-green-500", "text-red-500");
+          tunerNoteLabel.classList.add("text-blue-300");
+          tunerNeedle.style.transform = "translateX(-50%) rotateZ(0deg)";
+          lastUiUpdateTime = now; // Only update time if actual UI changes
+          return;
         }
 
-        function setNextTargetTrainer() {
-            trainerTargetFret = Math.floor(Math.random() * 13); // Random fret from 0 to 12
-            const baseFreq = STANDARD_TUNING[selectedString];
-            trainerTargetFreq = baseFreq * (2 ** (trainerTargetFret / 12));
-            const { name, octave } = freqToNoteName(trainerTargetFreq);
-            trainerTargetNote = `${name}${octave}`;
-            trainerNoteLabel.textContent = trainerTargetNote;
-            trainerNoteLabel.classList.add('text-blue-300');
-            trainerNoteLabel.classList.remove('text-green-500', 'text-red-500');
+        if (!shouldUpdateImmediately) {
+          return;
         }
 
-        function processAudioTrainer(freq, conf) {
-            // Throttling UI updates for calmer visual experience
-            const now = Date.now();
-            const shouldUpdateImmediately = (now - lastUiUpdateTime > minUiUpdateIntervalMs);
+        const { name, octave, midiNum } = freqToNoteName(pitch);
+        lastStableDetectedNote = { name, octave, midiNum }; // Store the currently stable detected note
 
-            if (conf < CONFIDENCE_THRESHOLD) {
-                if (shouldUpdateImmediately || trainerResultLabel.textContent !== "Low confidence. Play clearer.") {
-                    displayMessage("Low confidence. Play clearer.", "neutral", 'trainer');
-                    trainerDebugLabel.textContent = `Confidence: ${conf.toFixed(2)}`;
-                    trainerNoteLabel.classList.add('text-blue-300'); // Ensure blue if low confidence
-                    trainerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                    lastUiUpdateTime = now;
-                }
-                trainerSameCount = 0;
-                return;
-            } else if (freq <= 0) {
-                if (shouldUpdateImmediately || trainerResultLabel.textContent !== "No pitch detected") {
-                    displayMessage("No pitch detected", "neutral", 'trainer');
-                    trainerDebugLabel.textContent = `Confidence: ${conf.toFixed(2)}`;
-                    trainerNoteLabel.classList.add('text-blue-300'); // Ensure blue if no pitch
-                    trainerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                    lastUiUpdateTime = now;
-                }
-                trainerSameCount = 0;
-                return;
+        tunerNoteLabel.textContent = name || "--";
+        tunerOctaveLabel.textContent =
+          octave !== null ? `Octave ${octave}` : "";
+
+        const closestStandardFreq = midiNumberToFreq(midiNum);
+        const { centDiff } = getPitchDifference(closestStandardFreq, pitch);
+
+        if (centDiff !== null) {
+          tunerCentsLabel.textContent = `${centDiff.toFixed(0)} cents`;
+
+          const needleRotation = Math.max(
+            -45,
+            Math.min(45, centDiff * (45 / 50))
+          );
+          tunerNeedle.style.transform = `translateX(-50%) rotateZ(${needleRotation}deg)`;
+
+          if (Math.abs(centDiff) <= 10) {
+            // Very close (e.g., within 10 cents)
+            tunerCentsLabel.dataset.status = "correct";
+            tunerNoteLabel.classList.remove("text-blue-300", "text-red-500");
+            tunerNoteLabel.classList.add("text-green-500");
+          } else if (Math.abs(centDiff) <= 50) {
+            // Within 50 cents (acceptable range for 'close')
+            tunerCentsLabel.dataset.status = "neutral";
+            tunerNoteLabel.classList.remove("text-green-500", "text-red-500");
+            tunerNoteLabel.classList.add("text-blue-300");
+          } else {
+            // Far off
+            tunerCentsLabel.dataset.status = "wrong";
+            tunerNoteLabel.classList.remove("text-blue-300", "text-green-500");
+            tunerNoteLabel.classList.add("text-red-500");
+          }
+        } else {
+          tunerCentsLabel.textContent = "-- cents"; // If centDiff is null, show placeholder
+          tunerCentsLabel.dataset.status = "neutral";
+          tunerNeedle.style.transform = "translateX(-50%) rotateZ(0deg)";
+        }
+
+        lastUiUpdateTime = now; // Update timestamp after successful UI change
+      }
+
+      // --- Scales Mode Functions ---
+      function setupScaleControls() {
+        // Populate Key Select
+        NOTE_NAMES.forEach((note) => {
+          const option = document.createElement("option");
+          option.value = note;
+          option.textContent = note;
+          keySelect.appendChild(option);
+        });
+        keySelect.value = "C"; // Default to C
+
+        // Populate Scale/Mode Select
+        Object.keys(SCALES).forEach((scaleName) => {
+          const option = document.createElement("option");
+          option.value = scaleName;
+          option.textContent = scaleName;
+          scaleSelect.appendChild(option);
+        });
+        scaleSelect.value = "Major"; // Default to Major
+
+        // Add event listeners
+        keySelect.addEventListener("change", drawFretboard);
+        scaleSelect.addEventListener("change", drawFretboard);
+      }
+
+      function drawFretboard() {
+        fretboardContainer.innerHTML = ""; // Clear existing fretboard
+        fretNumberRow.innerHTML = ""; // Clear existing fret numbers
+
+        const selectedKey = keySelect.value;
+        const selectedScale = scaleSelect.value;
+        const scaleIntervals = SCALES[selectedScale];
+
+        if (!scaleIntervals) {
+          console.error("Scale intervals not found for:", selectedScale);
+          return;
+        }
+
+        // Calculate the absolute MIDI notes for the selected scale/key
+        const rootMidiValue = NOTE_NAMES_MIDI_MAP[selectedKey];
+        const scaleAbsoluteNotes = new Set(); // Store absolute MIDI note values for quick lookup
+        scaleIntervals.forEach((interval) => {
+          scaleAbsoluteNotes.add((rootMidiValue + interval) % 12); // Use modulo 12 for note name only
+        });
+
+        // Fretboard layout: 6 strings, 13 frets (0 to 12)
+        // String labels are in the first column
+        const stringOrder = ["E4", "B3", "G3", "D3", "A2", "E2"]; // High E to Low E
+
+        // Add fret numbers to the fretNumberRow
+        // First cell is empty to align with string labels
+        const emptyCellForStringLabel = document.createElement("div");
+        emptyCellForStringLabel.className = "fret-number-cell";
+        fretNumberRow.appendChild(emptyCellForStringLabel);
+
+        for (let i = 0; i <= 12; i++) {
+          // i represents the fret space number, from 0 to 12
+          const fretNumCell = document.createElement("div");
+          fretNumCell.className = "fret-number-cell";
+          if (i === 0) {
+            fretNumCell.textContent = ""; // Empty for the "open string" or "nut" position.
+          } else {
+            fretNumCell.textContent = i; // 1, 2, 3... for fret spaces
+          }
+          fretNumberRow.appendChild(fretNumCell);
+        }
+
+        stringOrder.forEach((stringName) => {
+          const stringMidiBase = GUITAR_STRING_MIDI_NOTES[stringName];
+
+          // Create string label cell
+          const stringLabelDiv = document.createElement("div");
+          stringLabelDiv.className = "string-label";
+          stringLabelDiv.textContent = stringName;
+          fretboardContainer.appendChild(stringLabelDiv);
+
+          for (let fret = 0; fret <= 12; fret++) {
+            // Frets 0 (nut) to 12
+            const fretDiv = document.createElement("div");
+            fretDiv.className = `fret fret-${fret}`;
+
+            // Add fret markers
+            if (fret === 3 || fret === 5 || fret === 7 || fret === 9) {
+              fretDiv.innerHTML = '<div class="fret-marker"></div>';
+            } else if (fret === 12) {
+              fretDiv.innerHTML =
+                '<div class="fret-marker fret-marker-12a"></div><div class="fret-marker fret-marker-12b"></div>';
             }
 
-            const { semitoneDiff, centDiff } = getPitchDifference(trainerTargetFreq, freq);
-            const { name: detectedNoteName, octave: detectedOctave } = freqToNoteName(freq);
-            const fullDetectedNote = `${detectedNoteName}${detectedOctave}`;
+            // Calculate the note at this fret
+            const fretNoteMidi = stringMidiBase + fret;
+            const { name: noteNameAtFret, midiNum: roundedMidiNum } =
+              freqToNoteName(midiNumberToFreq(fretNoteMidi));
+            const absoluteNoteValue = roundedMidiNum % 12; // Just the note name part (C=0, C#=1...)
 
-            const freqTolerance = 1.0; // Allow small freq variation for same-note detection
-            if (trainerLastNote === fullDetectedNote && Math.abs(freq - (trainerLastFreq || 0)) < freqTolerance) {
-                trainerSameCount++;
+            // Check if this note is in the selected scale
+            if (scaleAbsoluteNotes.has(absoluteNoteValue)) {
+              const noteDot = document.createElement("div");
+              noteDot.className = "note-dot";
+              noteDot.textContent = noteNameAtFret; // Show just the note name
+
+              // Check if it's the root note
+              if (absoluteNoteValue === rootMidiValue) {
+                noteDot.classList.add("root-note");
+              }
+              fretDiv.appendChild(noteDot);
+            }
+            fretboardContainer.appendChild(fretDiv);
+          }
+        });
+      }
+
+      // --- Chord Dictionary Functions ---
+
+      function setupChordControls() {
+        // Populate Chord Root Select
+        NOTE_NAMES.forEach((note) => {
+          const option = document.createElement("option");
+          option.value = note;
+          option.textContent = note;
+          chordRootSelect.appendChild(option);
+        });
+        chordRootSelect.value = "C"; // Default to C
+
+        // Populate Chord Type Select
+        Object.keys(CHORD_SHAPES_DATA).forEach((chordType) => {
+          const option = document.createElement("option");
+          option.value = chordType;
+          option.textContent = chordType;
+          chordTypeSelect.appendChild(option);
+        });
+        chordTypeSelect.value = "Major"; // Default to Major
+
+        // Add event listeners
+        chordRootSelect.addEventListener("change", drawChordDiagrams);
+        chordTypeSelect.addEventListener("change", drawChordDiagrams);
+
+        // Add event listener for Gemini API button
+        generateProgressionBtn.addEventListener(
+          "click",
+          generateChordProgression
+        );
+      }
+
+      async function generateChordProgression() {
+        const mood = moodInput.value.trim();
+        if (!mood) {
+          progressionOutput.textContent =
+            "Please enter a mood or style (e.g., Happy, Blues, Melancholy).";
+          return;
+        }
+
+        progressionOutput.textContent = "Generating progression... ✨";
+        generateProgressionBtn.disabled = true;
+
+        const prompt = `Generate a simple 4-chord progression suitable for a "${mood}" song on guitar. List only the chord names (e.g., C, G, Am, F) separated by spaces. Then, in a new paragraph, briefly explain why these chords work for that mood.`;
+
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+        const payload = { contents: chatHistory };
+        const apiKey = ""; // Canvas will automatically provide the API key at runtime
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const result = await response.json();
+
+          if (
+            result.candidates &&
+            result.candidates.length > 0 &&
+            result.candidates[0].content &&
+            result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0
+          ) {
+            const text = result.candidates[0].content.parts[0].text;
+            progressionOutput.innerHTML = text.replace(/\n/g, "<br>"); // Display newlines as <br>
+          } else {
+            progressionOutput.textContent =
+              "Could not generate progression. Please try again.";
+            console.error("Gemini API response structure unexpected:", result);
+          }
+        } catch (error) {
+          progressionOutput.textContent =
+            "Error generating progression. Check console for details.";
+          console.error("Error calling Gemini API:", error);
+        } finally {
+          generateProgressionBtn.disabled = false;
+        }
+      }
+
+      function drawChordDiagrams() {
+        chordDiagramsContainer.innerHTML = ""; // Clear existing diagrams
+
+        const selectedRoot = chordRootSelect.value;
+        const selectedType = chordTypeSelect.value;
+
+        const relevantShapes = CHORD_SHAPES_DATA[selectedType];
+
+        if (!relevantShapes || relevantShapes.length === 0) {
+          chordDiagramsContainer.innerHTML =
+            '<p class="text-gray-400">No shapes found for this chord type.</p>';
+          return;
+        }
+
+        // Fixed dimensions for chord diagram for consistency
+        const DIAGRAM_WIDTH = 240; // Increased size
+        const DIAGRAM_HEIGHT = 240; // Increased size
+        const DIAGRAM_TOP_PADDING = 25; // Space for X/O indicators above the nut (adjusted for larger diagram)
+        const VISIBLE_FRETS = 5; // Number of fret spaces visible (e.g., frets 0-4 or 1-5)
+
+        const playableAreaHeight = DIAGRAM_HEIGHT - DIAGRAM_TOP_PADDING;
+        const fretHeight = playableAreaHeight / VISIBLE_FRETS; // Height of one fret space
+        const stringSpacing = DIAGRAM_WIDTH / STRING_ORDER_CHORDS.length; // Horizontal space per string
+        const firstStringCenterX = stringSpacing / 2; // Center of the first string
+
+        relevantShapes.forEach((shapeData) => {
+          const chordCard = document.createElement("div");
+          chordCard.className = "chord-diagram-card";
+
+          const cardTitle = document.createElement("h3");
+          // Construct the full chord name (e.g., G Major - E-shape Barre)
+          const fullChordName = `${selectedRoot} ${selectedType}${
+            shapeData.name ? ` - ${shapeData.name}` : ""
+          }`;
+          cardTitle.className = "text-xl font-bold text-white mb-3 text-center";
+          cardTitle.textContent = fullChordName;
+          chordCard.appendChild(cardTitle);
+
+          // This wrapper ensures the fret number label can be positioned relative to the diagram itself.
+          const diagramContainerWithFretNumber = document.createElement("div");
+          diagramContainerWithFretNumber.className =
+            "chord-diagram-wrapper-with-label";
+
+          const diagramWrapper = document.createElement("div");
+          diagramWrapper.className = "chord-fretboard";
+          diagramWrapper.style.width = `${DIAGRAM_WIDTH}px`;
+          diagramWrapper.style.height = `${DIAGRAM_HEIGHT}px`;
+
+          // --- Calculate semitone offset for transposition ---
+          let semitoneOffset = 0;
+          if (shapeData.templateRootNote) {
+            const templateRootNoteIndex =
+              NOTE_NAMES_MIDI_MAP[shapeData.templateRootNote];
+            const selectedRootNoteIndex = NOTE_NAMES_MIDI_MAP[selectedRoot];
+            // Calculate the difference, ensuring it's positive using modulo 12
+            semitoneOffset =
+              (selectedRootNoteIndex - templateRootNoteIndex + 12) % 12;
+          }
+
+          // --- Apply the offset to get actual frets ---
+          const actualFrets = shapeData.frets.map((fret) => {
+            if (fret === -1 || fret === 0) return fret; // Muted or Open strings stay as is
+            return fret + semitoneOffset;
+          });
+
+          // --- Apply the offset to the barre fret (if it exists) ---
+          const actualBarreFret = shapeData.barre
+            ? shapeData.barre.fret + semitoneOffset
+            : 0;
+
+          // --- Determine the diagram's starting fret ---
+          let calculatedDiagramStartFret = 0;
+          let hasFrettedNotes = false;
+          let lowestFrettedNoteFret = Infinity;
+
+          actualFrets.forEach((fret) => {
+            if (fret > 0) {
+              // Only consider fretted notes for the lowest fret
+              hasFrettedNotes = true;
+              if (fret < lowestFrettedNoteFret) {
+                lowestFrettedNoteFret = fret;
+              }
+            }
+          });
+
+          if (hasFrettedNotes) {
+            calculatedDiagramStartFret = lowestFrettedNoteFret;
+          }
+
+          // If there's a transposed barre, and it's lower than or equal to the current lowest fretted note, use the barre fret as the start.
+          if (shapeData.barre && actualBarreFret > 0) {
+            if (
+              !hasFrettedNotes ||
+              actualBarreFret <= calculatedDiagramStartFret
+            ) {
+              calculatedDiagramStartFret = actualBarreFret;
+            }
+          }
+
+          // If all notes are open or muted, the diagram should logically start at fret 0.
+          const allNotesOpenOrMuted = actualFrets.every(
+            (f) => f === -1 || f === 0
+          );
+          if (allNotesOpenOrMuted) {
+            calculatedDiagramStartFret = 0;
+          }
+
+          // --- Draw Fret Number Label (if starting fret is > 0) ---
+          if (calculatedDiagramStartFret > 0) {
+            const fretNumberLabel = document.createElement("div");
+            fretNumberLabel.textContent = calculatedDiagramStartFret;
+            fretNumberLabel.className = "fret-number-label";
+            // Position vertically centered on the first fret space of the diagram
+            fretNumberLabel.style.top = `${
+              DIAGRAM_TOP_PADDING + fretHeight / 2
+            }px`;
+            diagramContainerWithFretNumber.appendChild(fretNumberLabel);
+          }
+
+          // --- Draw Horizontal Fret Lines ---
+          // The first line is the nut.
+          const nutLine = document.createElement("div");
+          nutLine.className = "fret-line-horizontal";
+          nutLine.style.top = `${DIAGRAM_TOP_PADDING - 2}px`; // Slightly above top border for nut effect
+          nutLine.style.height = "4px"; // Thicker nut
+          nutLine.style.backgroundColor =
+            "rgba(255, 255, 255, 0.4)"; /* Nut color */
+          diagramWrapper.appendChild(nutLine);
+
+          // Subsequent fret lines
+          for (let i = 1; i <= VISIBLE_FRETS; i++) {
+            // Lines for frets 1, 2, 3, 4, 5 relative to diagram start
+            const line = document.createElement("div");
+            line.className = "fret-line-horizontal";
+            line.style.top = `${DIAGRAM_TOP_PADDING + fretHeight * i}px`;
+            diagramWrapper.appendChild(line);
+          }
+
+          // --- Draw Vertical String Lines ---
+          for (let i = 0; i < STRING_ORDER_CHORDS.length; i++) {
+            const line = document.createElement("div");
+            line.className = "string-line-vertical";
+            line.style.left = `${firstStringCenterX + stringSpacing * i}px`;
+            diagramWrapper.appendChild(line);
+          }
+
+          // --- Draw Barre (if present and matches calculatedDiagramStartFret) ---
+          if (
+            shapeData.barre &&
+            actualBarreFret === calculatedDiagramStartFret
+          ) {
+            const barreStartStringIndex = shapeData.barre.fromString;
+            const barreEndStringIndex = shapeData.barre.toString;
+
+            const barreDiv = document.createElement("div");
+            barreDiv.className = "barre-shape";
+            // Calculate width from center of first barre string to center of last barre string
+            const barreWidth =
+              (barreEndStringIndex - barreStartStringIndex) * stringSpacing +
+              (stringSpacing - 5); // Adjusted for a tighter fit
+            barreDiv.style.width = `${barreWidth}px`;
+            barreDiv.style.left = `${
+              firstStringCenterX + stringSpacing * barreStartStringIndex
+            }px`;
+            barreDiv.style.top = `${DIAGRAM_TOP_PADDING + fretHeight / 2}px`;
+            barreDiv.style.transform = "translate(-50%, -50%)";
+            diagramWrapper.appendChild(barreDiv);
+          }
+
+          // --- Draw String Indicators (X/O) and Fret Dots ---
+          const stringIndicatorRow = document.createElement("div");
+          stringIndicatorRow.className = "string-indicator-container";
+          diagramWrapper.appendChild(stringIndicatorRow);
+
+          STRING_ORDER_CHORDS.forEach((stringName, index) => {
+            // Iterate from low E to high E (left to right)
+            const fretValue = actualFrets[index]; // Use the adjusted (transposed) fret value
+
+            // Add X/O indicator
+            const indicatorSpan = document.createElement("span");
+            indicatorSpan.className = "string-indicator";
+            if (fretValue === -1) {
+              indicatorSpan.textContent = "X";
+              indicatorSpan.classList.add("muted-string");
+            } else if (fretValue === 0) {
+              indicatorSpan.textContent = "O";
+              indicatorSpan.classList.add("open-string");
             } else {
-                trainerSameCount = 0;
+              indicatorSpan.textContent = ""; // No indicator for fretted strings
             }
+            stringIndicatorRow.appendChild(indicatorSpan);
 
-            trainerLastFreq = freq;
-            trainerLastNote = fullDetectedNote;
+            // Draw Fret Dots
+            if (fretValue > 0) {
+              // Only draw dot for fretted notes
+              const relativeFret = fretValue - calculatedDiagramStartFret; // Relative to the diagram's start
 
-            // Only update main feedback and potentially trigger next target after sufficient stability
-            if (trainerSameCount >= TRAINER_STABILITY_THRESHOLD) {
-                if (isPitchClose(trainerTargetFreq, freq)) {
-                    if (trainerResultLabel.dataset.status !== "correct" || trainerResultLabel.textContent !== `✅ Correct! ${fullDetectedNote}`) { // Prevent redundant updates
-                        displayMessage(`✅ Correct! ${fullDetectedNote}`, "correct", 'trainer');
-                        trainerNoteLabel.classList.remove('text-blue-300', 'text-red-500');
-                        trainerNoteLabel.classList.add('text-green-500');
-                        setNextTargetTrainer();
-                        trainerSameCount = 0; // Reset counter after correct pitch
-                        lastUiUpdateTime = now; // Update timestamp only on actual UI change for correct note
-                    }
-                } else {
-                    const direction = centDiff > 0 ? "Sharp" : "Flat";
-                    const newText = `❌ Too ${direction} by ${Math.abs(centDiff).toFixed(0)} cents (${fullDetectedNote})`;
-                    if (shouldUpdateImmediately || trainerResultLabel.textContent !== newText) { // Prevent redundant updates
-                        displayMessage(newText, "wrong", 'trainer');
-                        trainerNoteLabel.classList.remove('text-blue-300', 'text-green-500');
-                        trainerNoteLabel.classList.add('text-red-500');
-                        lastUiUpdateTime = now;
-                    }
+              if (relativeFret >= 0 && relativeFret < VISIBLE_FRETS) {
+                // If note is within visible frets
+                const dot = document.createElement("div");
+                dot.className = "fret-dot";
+                // Get the actual note name for the dot
+                dot.textContent = freqToNoteName(
+                  midiNumberToFreq(
+                    GUITAR_STRING_MIDI_NOTES[STRING_ORDER_CHORDS[index]] +
+                      fretValue
+                  )
+                ).name;
+
+                // Calculate dot position based on relative fret
+                // Vertically center in the fret space
+                dot.style.top = `${
+                  DIAGRAM_TOP_PADDING +
+                  relativeFret * fretHeight +
+                  fretHeight / 2
+                }px`;
+                dot.style.left = `${
+                  firstStringCenterX + stringSpacing * index
+                }px`;
+
+                // Check if this is the root note of the chord
+                const selectedRootMidiValue = NOTE_NAMES_MIDI_MAP[selectedRoot];
+                const stringMidiBaseCurrent =
+                  GUITAR_STRING_MIDI_NOTES[STRING_ORDER_CHORDS[index]];
+                if (
+                  (stringMidiBaseCurrent + fretValue) % 12 ===
+                  selectedRootMidiValue
+                ) {
+                  dot.classList.add("root"); // Add 'root' class for styling
                 }
-            } else if (shouldUpdateImmediately) { // Update "Detecting..." message periodically if not stable
-                 displayMessage(`Detecting... (${fullDetectedNote})`, "neutral", 'trainer');
-                 trainerNoteLabel.classList.add('text-blue-300'); // Keep blue while detecting
-                 trainerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                 lastUiUpdateTime = now;
+                diagramWrapper.appendChild(dot);
+              }
             }
-
-            // Always update debug info if desired, or apply throttling here too if needed
-            if (shouldUpdateImmediately) {
-                trainerDebugLabel.textContent = `Detected: ${freq.toFixed(2)} Hz | Confidence: ${conf.toFixed(2)}`;
-            }
-        }
-
-        // --- Tuner Mode Functions ---
-        function processAudioTuner(freq, conf) {
-            const now = Date.now();
-            const shouldUpdateImmediately = (now - lastUiUpdateTime > minUiUpdateIntervalMs);
-
-            if (conf < CONFIDENCE_THRESHOLD) {
-                if (lastStableDetectedNote) {
-                    tunerCentsLabel.textContent = 'Too quiet / No pitch';
-                    tunerCentsLabel.dataset.status = 'inactive'; // Set status to inactive
-                    tunerDebugLabel.textContent = `Confidence: ${conf.toFixed(2)} (Showing last note)`;
-                } else {
-                    tunerNoteLabel.textContent = '--';
-                    tunerOctaveLabel.textContent = '';
-                    tunerCentsLabel.textContent = 'Too quiet / No pitch';
-                    tunerCentsLabel.dataset.status = 'neutral';
-                    tunerDebugLabel.textContent = `Confidence: ${conf.toFixed(2)}`;
-                }
-                tunerNeedle.style.transform = 'translateX(-50%) rotateZ(0deg)';
-                lastUiUpdateTime = now;
-                return;
-            } else if (freq <= 0) {
-                 if (lastStableDetectedNote) {
-                    tunerCentsLabel.textContent = 'No pitch detected';
-                    tunerCentsLabel.dataset.status = 'inactive';
-                    tunerDebugLabel.textContent = `Confidence: ${conf.toFixed(2)} (Showing last note)`;
-                } else {
-                    tunerNoteLabel.textContent = '--';
-                    tunerOctaveLabel.textContent = '';
-                    tunerCentsLabel.textContent = 'No pitch detected';
-                    tunerCentsLabel.dataset.status = 'neutral';
-                    tunerDebugLabel.textContent = `Confidence: ${conf.toFixed(2)}`;
-                }
-                tunerNeedle.style.transform = 'translateX(-50%) rotateZ(0deg)';
-                lastUiUpdateTime = now;
-                return;
-            }
-
-            if (!shouldUpdateImmediately) {
-                return;
-            }
-
-            const { name, octave, midiNum } = freqToNoteName(freq);
-            lastStableDetectedNote = { name, octave, midiNum }; // Store the currently stable detected note
-
-            tunerNoteLabel.textContent = name || '--';
-            tunerOctaveLabel.textContent = octave !== null ? `Octave ${octave}` : '';
-
-            const closestStandardFreq = midiNumberToFreq(midiNum);
-            const { centDiff } = getPitchDifference(closestStandardFreq, freq);
-
-            if (centDiff !== null) {
-                tunerCentsLabel.textContent = `${centDiff.toFixed(0)} cents`;
-
-                const needleRotation = Math.max(-45, Math.min(45, centDiff * (45 / 50)));
-                tunerNeedle.style.transform = `translateX(-50%) rotateZ(${needleRotation}deg)`;
-
-                if (Math.abs(centDiff) <= 10) { // Very close (e.g., within 10 cents)
-                    tunerCentsLabel.dataset.status = 'correct';
-                    tunerNoteLabel.classList.remove('text-blue-300', 'text-red-500');
-                    tunerNoteLabel.classList.add('text-green-500');
-                } else if (Math.abs(centDiff) <= 50) { // Within 50 cents (acceptable range for 'close')
-                    tunerCentsLabel.dataset.status = 'neutral';
-                    tunerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                    tunerNoteLabel.classList.add('text-blue-300');
-                } else { // Far off
-                    tunerCentsLabel.dataset.status = 'wrong';
-                    tunerNoteLabel.classList.remove('text-blue-300', 'text-green-500');
-                    tunerNoteLabel.classList.add('text-red-500');
-                }
-            }
-            tunerDebugLabel.textContent = `Detected: ${freq.toFixed(2)} Hz | Confidence: ${conf.toFixed(2)}`;
-            lastUiUpdateTime = now; // Update timestamp after successful UI change
-        }
-
-
-        // --- Scales Mode Functions ---
-        function setupScaleControls() {
-            // Populate Key Select
-            NOTE_NAMES.forEach(note => {
-                const option = document.createElement("option");
-                option.value = note;
-                option.textContent = note;
-                keySelect.appendChild(option);
-            });
-            keySelect.value = 'C'; // Default to C
-
-            // Populate Scale/Mode Select
-            Object.keys(SCALES).forEach(scaleName => {
-                const option = document.createElement("option");
-                option.value = scaleName;
-                option.textContent = scaleName;
-                scaleSelect.appendChild(option);
-            });
-            scaleSelect.value = 'Major'; // Default to Major
-
-            // Add event listeners
-            keySelect.addEventListener('change', drawFretboard);
-            scaleSelect.addEventListener('change', drawFretboard);
-        }
-
-        function drawFretboard() {
-            fretboardContainer.innerHTML = ''; // Clear existing fretboard
-            fretNumberRow.innerHTML = ''; // Clear existing fret numbers
-
-            const selectedKey = keySelect.value;
-            const selectedScale = scaleSelect.value;
-            const scaleIntervals = SCALES[selectedScale];
-
-            if (!scaleIntervals) {
-                console.error("Scale intervals not found for:", selectedScale);
-                return;
-            }
-
-            // Calculate the absolute MIDI notes for the selected scale/key
-            const rootMidiValue = NOTE_NAMES_MIDI_MAP[selectedKey];
-            const scaleAbsoluteNotes = new Set(); // Store absolute MIDI note values for quick lookup
-            scaleIntervals.forEach(interval => {
-                scaleAbsoluteNotes.add((rootMidiValue + interval) % 12); // Use modulo 12 for note name only
-            });
-
-            // Fretboard layout: 6 strings, 13 frets (0 to 12)
-            // String labels are in the first column
-            const stringOrder = ["E4", "B3", "G3", "D3", "A2", "E2"]; // High E to Low E
-
-            // Add fret numbers to the fretNumberRow
-            // First cell is empty to align with string labels
-            const emptyCellForStringLabel = document.createElement('div');
-            emptyCellForStringLabel.className = 'fret-number-cell';
-            fretNumberRow.appendChild(emptyCellForStringLabel);
-
-            for (let i = 0; i <= 12; i++) { // i represents the fret space number, from 0 to 12
-                const fretNumCell = document.createElement('div');
-                fretNumCell.className = 'fret-number-cell';
-                if (i === 0) {
-                    fretNumCell.textContent = ''; // Empty for the "open string" or "nut" position.
-                } else {
-                    fretNumCell.textContent = i; // 1, 2, 3... for fret spaces
-                }
-                fretNumberRow.appendChild(fretNumCell);
-            }
-
-
-            stringOrder.forEach(stringName => {
-                const stringMidiBase = GUITAR_STRING_MIDI_NOTES[stringName];
-
-                // Create string label cell
-                const stringLabelDiv = document.createElement('div');
-                stringLabelDiv.className = 'string-label';
-                stringLabelDiv.textContent = stringName;
-                fretboardContainer.appendChild(stringLabelDiv);
-
-                for (let fret = 0; fret <= 12; fret++) { // Frets 0 (nut) to 12
-                    const fretDiv = document.createElement('div');
-                    fretDiv.className = `fret fret-${fret}`;
-
-                    // Add fret markers
-                    if (fret === 3 || fret === 5 || fret === 7 || fret === 9) {
-                        fretDiv.innerHTML = '<div class="fret-marker"></div>';
-                    } else if (fret === 12) {
-                        fretDiv.innerHTML = '<div class="fret-marker fret-marker-12a"></div><div class="fret-marker fret-marker-12b"></div>';
-                    }
-
-                    // Calculate the note at this fret
-                    const fretNoteMidi = stringMidiBase + fret;
-                    const { name: noteNameAtFret, midiNum: roundedMidiNum } = freqToNoteName(midiNumberToFreq(fretNoteMidi));
-                    const absoluteNoteValue = roundedMidiNum % 12; // Just the note name part (C=0, C#=1...)
-
-                    // Check if this note is in the selected scale
-                    if (scaleAbsoluteNotes.has(absoluteNoteValue)) {
-                        const noteDot = document.createElement('div');
-                        noteDot.className = 'note-dot';
-                        noteDot.textContent = noteNameAtFret; // Show just the note name
-
-                        // Check if it's the root note
-                        if (absoluteNoteValue === rootMidiValue) {
-                            noteDot.classList.add('root-note');
-                        }
-                        fretDiv.appendChild(noteDot);
-                    }
-                    fretboardContainer.appendChild(fretDiv);
-                }
-            });
-        }
-
-        // --- Chord Dictionary Functions ---
-
-        function setupChordControls() {
-            // Populate Chord Root Select
-            NOTE_NAMES.forEach(note => {
-                const option = document.createElement("option");
-                option.value = note;
-                option.textContent = note;
-                chordRootSelect.appendChild(option);
-            });
-            chordRootSelect.value = 'C'; // Default to C
-
-            // Populate Chord Type Select
-            Object.keys(CHORD_SHAPES_DATA).forEach(chordType => {
-                const option = document.createElement("option");
-                option.value = chordType;
-                option.textContent = chordType;
-                chordTypeSelect.appendChild(option);
-            });
-            chordTypeSelect.value = 'Major'; // Default to Major
-
-            // Add event listeners
-            chordRootSelect.addEventListener('change', drawChordDiagrams);
-            chordTypeSelect.addEventListener('change', drawChordDiagrams);
-
-            // Add event listener for Gemini API button
-            generateProgressionBtn.addEventListener('click', generateChordProgression);
-        }
-
-        async function generateChordProgression() {
-            const mood = moodInput.value.trim();
-            if (!mood) {
-                progressionOutput.textContent = "Please enter a mood or style (e.g., Happy, Blues, Melancholy).";
-                return;
-            }
-
-            progressionOutput.textContent = "Generating progression... ✨";
-            generateProgressionBtn.disabled = true;
-
-            const prompt = `Generate a simple 4-chord progression suitable for a "${mood}" song on guitar. List only the chord names (e.g., C, G, Am, F) separated by spaces. Then, in a new paragraph, briefly explain why these chords work for that mood.`;
-
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-            const payload = { contents: chatHistory };
-            const apiKey = ""; // Canvas will automatically provide the API key at runtime
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    progressionOutput.innerHTML = text.replace(/\n/g, '<br>'); // Display newlines as <br>
-                } else {
-                    progressionOutput.textContent = "Could not generate progression. Please try again.";
-                    console.error("Gemini API response structure unexpected:", result);
-                }
-            } catch (error) {
-                progressionOutput.textContent = "Error generating progression. Check console for details.";
-                console.error("Error calling Gemini API:", error);
-            } finally {
-                generateProgressionBtn.disabled = false;
-            }
-        }
-
-
-        function drawChordDiagrams() {
-            chordDiagramsContainer.innerHTML = ''; // Clear existing diagrams
-
-            const selectedRoot = chordRootSelect.value;
-            const selectedType = chordTypeSelect.value;
-
-            const relevantShapes = CHORD_SHAPES_DATA[selectedType];
-
-            if (!relevantShapes || relevantShapes.length === 0) {
-                chordDiagramsContainer.innerHTML = '<p class="text-gray-400">No shapes found for this chord type.</p>';
-                return;
-            }
-
-            // Fixed dimensions for chord diagram for consistency
-            const DIAGRAM_WIDTH = 240; // Increased size
-            const DIAGRAM_HEIGHT = 240; // Increased size
-            const DIAGRAM_TOP_PADDING = 25; // Space for X/O indicators above the nut (adjusted for larger diagram)
-            const VISIBLE_FRETS = 5; // Number of fret spaces visible (e.g., frets 0-4 or 1-5)
-
-            const playableAreaHeight = DIAGRAM_HEIGHT - DIAGRAM_TOP_PADDING;
-            const fretHeight = playableAreaHeight / VISIBLE_FRETS; // Height of one fret space
-            const stringSpacing = DIAGRAM_WIDTH / STRING_ORDER_CHORDS.length; // Horizontal space per string
-            const firstStringCenterX = stringSpacing / 2; // Center of the first string
-
-            relevantShapes.forEach(shapeData => {
-                const chordCard = document.createElement('div');
-                chordCard.className = 'chord-diagram-card';
-
-                const cardTitle = document.createElement('h3');
-                // Construct the full chord name (e.g., G Major - E-shape Barre)
-                const fullChordName = `${selectedRoot} ${selectedType}${shapeData.name ? ` - ${shapeData.name}` : ''}`;
-                cardTitle.className = 'text-xl font-bold text-white mb-3 text-center';
-                cardTitle.textContent = fullChordName;
-                chordCard.appendChild(cardTitle);
-
-                // This wrapper ensures the fret number label can be positioned relative to the diagram itself.
-                const diagramContainerWithFretNumber = document.createElement('div');
-                diagramContainerWithFretNumber.className = 'chord-diagram-wrapper-with-label';
-
-                const diagramWrapper = document.createElement('div');
-                diagramWrapper.className = 'chord-fretboard';
-                diagramWrapper.style.width = `${DIAGRAM_WIDTH}px`;
-                diagramWrapper.style.height = `${DIAGRAM_HEIGHT}px`;
-
-                // --- Calculate semitone offset for transposition ---
-                let semitoneOffset = 0;
-                if (shapeData.templateRootNote) {
-                    const templateRootNoteIndex = NOTE_NAMES_MIDI_MAP[shapeData.templateRootNote];
-                    const selectedRootNoteIndex = NOTE_NAMES_MIDI_MAP[selectedRoot];
-                    // Calculate the difference, ensuring it's positive using modulo 12
-                    semitoneOffset = (selectedRootNoteIndex - templateRootNoteIndex + 12) % 12;
-                }
-
-                // --- Apply the offset to get actual frets ---
-                const actualFrets = shapeData.frets.map(fret => {
-                    if (fret === -1 || fret === 0) return fret; // Muted or Open strings stay as is
-                    return fret + semitoneOffset;
-                });
-
-                // --- Apply the offset to the barre fret (if it exists) ---
-                const actualBarreFret = shapeData.barre ? (shapeData.barre.fret + semitoneOffset) : 0;
-
-                // --- Determine the diagram's starting fret ---
-                let calculatedDiagramStartFret = 0;
-                let hasFrettedNotes = false;
-                let lowestFrettedNoteFret = Infinity;
-
-                actualFrets.forEach(fret => {
-                    if (fret > 0) { // Only consider fretted notes for the lowest fret
-                        hasFrettedNotes = true;
-                        if (fret < lowestFrettedNoteFret) {
-                            lowestFrettedNoteFret = fret;
-                        }
-                    }
-                });
-
-                if (hasFrettedNotes) {
-                    calculatedDiagramStartFret = lowestFrettedNoteFret;
-                }
-
-                // If there's a transposed barre, and it's lower than or equal to the current lowest fretted note, use the barre fret as the start.
-                if (shapeData.barre && actualBarreFret > 0) {
-                    if (!hasFrettedNotes || actualBarreFret <= calculatedDiagramStartFret) {
-                        calculatedDiagramStartFret = actualBarreFret;
-                    }
-                }
-
-                // If all notes are open or muted, the diagram should logically start at fret 0.
-                const allNotesOpenOrMuted = actualFrets.every(f => f === -1 || f === 0);
-                if (allNotesOpenOrMuted) {
-                    calculatedDiagramStartFret = 0;
-                }
-                
-                // --- Draw Fret Number Label (if starting fret is > 0) ---
-                if (calculatedDiagramStartFret > 0) {
-                    const fretNumberLabel = document.createElement('div');
-                    fretNumberLabel.textContent = calculatedDiagramStartFret;
-                    fretNumberLabel.className = 'fret-number-label';
-                    // Position vertically centered on the first fret space of the diagram
-                    fretNumberLabel.style.top = `${DIAGRAM_TOP_PADDING + (fretHeight / 2)}px`;
-                    diagramContainerWithFretNumber.appendChild(fretNumberLabel);
-                }
-
-                // --- Draw Horizontal Fret Lines ---
-                // The first line is the nut.
-                const nutLine = document.createElement('div');
-                nutLine.className = 'fret-line-horizontal';
-                nutLine.style.top = `${DIAGRAM_TOP_PADDING - 2}px`; // Slightly above top border for nut effect
-                nutLine.style.height = '4px'; // Thicker nut
-                nutLine.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; /* Nut color */
-                diagramWrapper.appendChild(nutLine);
-
-                // Subsequent fret lines
-                for (let i = 1; i <= VISIBLE_FRETS; i++) { // Lines for frets 1, 2, 3, 4, 5 relative to diagram start
-                    const line = document.createElement('div');
-                    line.className = 'fret-line-horizontal';
-                    line.style.top = `${DIAGRAM_TOP_PADDING + (fretHeight * i)}px`;
-                    diagramWrapper.appendChild(line);
-                }
-
-                // --- Draw Vertical String Lines ---
-                for (let i = 0; i < STRING_ORDER_CHORDS.length; i++) {
-                    const line = document.createElement('div');
-                    line.className = 'string-line-vertical';
-                    line.style.left = `${firstStringCenterX + (stringSpacing * i)}px`;
-                    diagramWrapper.appendChild(line);
-                }
-
-                // --- Draw Barre (if present and matches calculatedDiagramStartFret) ---
-                if (shapeData.barre && actualBarreFret === calculatedDiagramStartFret) {
-                    const barreStartStringIndex = shapeData.barre.fromString;
-                    const barreEndStringIndex = shapeData.barre.toString;
-                    
-                    const barreDiv = document.createElement('div');
-                    barreDiv.className = 'barre-shape';
-                    // Calculate width from center of first barre string to center of last barre string
-                    const barreWidth = (barreEndStringIndex - barreStartStringIndex) * stringSpacing + (stringSpacing - 5); // Adjusted for a tighter fit
-                    barreDiv.style.width = `${barreWidth}px`;
-                    barreDiv.style.left = `${firstStringCenterX + (stringSpacing * barreStartStringIndex)}px`;
-                    barreDiv.style.top = `${DIAGRAM_TOP_PADDING + (fretHeight / 2)}px`;
-                    barreDiv.style.transform = 'translate(-50%, -50%)';
-                    diagramWrapper.appendChild(barreDiv);
-                }
-
-                // --- Draw String Indicators (X/O) and Fret Dots ---
-                const stringIndicatorRow = document.createElement('div');
-                stringIndicatorRow.className = 'string-indicator-container';
-                diagramWrapper.appendChild(stringIndicatorRow);
-
-                STRING_ORDER_CHORDS.forEach((stringName, index) => { // Iterate from low E to high E (left to right)
-                    const fretValue = actualFrets[index]; // Use the adjusted (transposed) fret value
-
-                    // Add X/O indicator
-                    const indicatorSpan = document.createElement('span');
-                    indicatorSpan.className = 'string-indicator';
-                    if (fretValue === -1) {
-                        indicatorSpan.textContent = 'X';
-                        indicatorSpan.classList.add('muted-string');
-                    } else if (fretValue === 0) {
-                        indicatorSpan.textContent = 'O';
-                        indicatorSpan.classList.add('open-string');
-                    } else {
-                        indicatorSpan.textContent = ''; // No indicator for fretted strings
-                    }
-                    stringIndicatorRow.appendChild(indicatorSpan);
-
-                    // Draw Fret Dots
-                    if (fretValue > 0) { // Only draw dot for fretted notes
-                        const relativeFret = fretValue - calculatedDiagramStartFret; // Relative to the diagram's start
-
-                        if (relativeFret >= 0 && relativeFret < VISIBLE_FRETS) { // If note is within visible frets
-                            const dot = document.createElement('div');
-                            dot.className = 'fret-dot';
-                            // Get the actual note name for the dot
-                            dot.textContent = freqToNoteName(midiNumberToFreq(GUITAR_STRING_MIDI_NOTES[STRING_ORDER_CHORDS[index]] + fretValue)).name;
-
-                            // Calculate dot position based on relative fret
-                            // Vertically center in the fret space
-                            dot.style.top = `${DIAGRAM_TOP_PADDING + (relativeFret * fretHeight) + (fretHeight / 2)}px`;
-                            dot.style.left = `${firstStringCenterX + (stringSpacing * index)}px`;
-
-                            // Check if this is the root note of the chord
-                            const selectedRootMidiValue = NOTE_NAMES_MIDI_MAP[selectedRoot];
-                            const stringMidiBaseCurrent = GUITAR_STRING_MIDI_NOTES[STRING_ORDER_CHORDS[index]];
-                            if (((stringMidiBaseCurrent + fretValue) % 12) === selectedRootMidiValue) {
-                                dot.classList.add('root'); // Add 'root' class for styling
-                            }
-                            diagramWrapper.appendChild(dot);
-                        }
-                    }
-                });
-
-                diagramContainerWithFretNumber.appendChild(diagramWrapper); // Append the actual fretboard to the wrapper
-                chordCard.appendChild(diagramContainerWithFretNumber); // Append the wrapper (with label and diagram) to the card
-                chordDiagramsContainer.appendChild(chordCard);
-            });
-        }
-        // --- Audio Control Functions ---
-        async function startMicrophone() {
-            if (isMicrophoneActive) {
-                console.log("Microphone already active.");
-                return;
-            }
-
-            // Decide which processAudio function to use based on current mode
-            let audioProcessor;
-            if (currentMode === "trainer") {
-                audioProcessor = processAudioTrainer;
-            } else if (currentMode === "tuner") {
-                audioProcessor = processAudioTuner;
-            } else {
-                // Should not happen if button is hidden, but as a safeguard
-                console.log("Microphone not needed for current mode.");
-                return;
-            }
-
-            audioStream = new AudioPitchStream(audioProcessor);
-            await audioStream.start();
-
-            if (audioStream.running) {
-                isMicrophoneActive = true;
-                toggleAudioButton.textContent = "Stop Microphone";
-                toggleAudioButton.classList.replace("bg-green-600", "bg-red-600");
-                toggleAudioButton.classList.replace("hover:bg-green-700", "hover:bg-red-700");
-                toggleAudioButton.classList.add("active"); // Add active class for custom styling
-                displayMessage("Listening...", "neutral", currentMode);
-            } else {
-                // If stream failed to start, revert button state
-                toggleAudioButton.textContent = "Start Microphone";
-                toggleAudioButton.classList.replace("bg-red-600", "bg-green-600");
-                toggleAudioButton.classList.replace("hover:bg-red-700", "hover:bg-green-700");
-                toggleAudioButton.classList.remove("active"); // Remove active class
-                isMicrophoneActive = false;
-            }
-        }
-
-        function stopMicrophone() {
-            if (!isMicrophoneActive) {
-                console.log("Microphone already stopped.");
-                return;
-            }
-
-            if (audioStream) {
-                audioStream.stop();
-            }
-            isMicrophoneActive = false;
-            toggleAudioButton.textContent = "Start Microphone";
-            toggleAudioButton.classList.replace("bg-red-600", "bg-green-600");
-            toggleAudioButton.classList.replace("hover:bg-red-700", "hover:bg-green-700");
-            toggleAudioButton.classList.remove("active"); // Remove active class
-
-            // Reset specific UI elements based on current mode
-            if (currentMode === 'trainer') {
-                displayMessage("Microphone stopped.", "neutral", 'trainer');
-                trainerDebugLabel.textContent = "";
-                trainerNoteLabel.classList.add('text-blue-300'); // Use blue for inactive
-                trainerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                trainerNoteLabel.textContent = trainerTargetNote; // Reset to target note
-            } else if (currentMode === 'tuner') {
-                tunerNoteLabel.textContent = '--';
-                tunerOctaveLabel.textContent = '';
-                tunerCentsLabel.textContent = '0 cents';
-                tunerCentsLabel.dataset.status = 'neutral';
-                tunerNeedle.style.transform = 'translateX(-50%) rotateZ(0deg)';
-                tunerDebugLabel.textContent = "Microphone stopped.";
-                tunerNoteLabel.classList.add('text-blue-300'); // Use blue for inactive
-                tunerNoteLabel.classList.remove('text-green-500', 'text-red-500');
-                lastStableDetectedNote = null;
-            }
-        }
-
-        // --- Event Listeners and Initial Setup ---
-
-        toggleAudioButton.addEventListener('click', () => {
-            if (isMicrophoneActive) {
-                stopMicrophone();
-            } else {
-                startMicrophone();
-            }
+          });
+
+          diagramContainerWithFretNumber.appendChild(diagramWrapper); // Append the actual fretboard to the wrapper
+          chordCard.appendChild(diagramContainerWithFretNumber); // Append the wrapper (with label and diagram) to the card
+          chordDiagramsContainer.appendChild(chordCard);
         });
-
-        trainerModeBtn.addEventListener('click', () => {
-            switchMode('trainer');
-        });
-        tunerModeBtn.addEventListener('click', () => {
-            switchMode('tuner');
-        });
-        scalesModeBtn.addEventListener('click', () => {
-            switchMode('scales');
-        });
-        chordsModeBtn.addEventListener('click', () => {
-            switchMode('chords');
-        });
-
-
-        // Initialize on page load
-        document.addEventListener("DOMContentLoaded", () => {
-            setupStringButtons(); // Create string buttons for Trainer mode
-            setNextTargetTrainer(); // Set initial target note for Trainer mode
-            setupScaleControls(); // Setup dropdowns for Scales mode
-            drawFretboard(); // Draw initial fretboard for Scales mode
-            setupChordControls(); // Setup dropdowns for Chords mode
-            // Initial call to draw chords happens inside switchMode('chords')
-            // if it's the default or explicitly switched to.
-            // If not, drawChordDiagrams is called here to ensure initial state on page load.
-            drawChordDiagrams();
-
-            // Set initial mode to Trainer
-            switchMode('trainer');
-            // Ensure correct button state on load (Trainer is selected)
-            trainerModeBtn.classList.add('selected');
-            displayMessage("Click 'Start Microphone' to begin.", "neutral", currentMode);
-        });
-
-        // Helper to convert MIDI number to frequency (was missing from previous iteration)
-        function midiNumberToFreq(midiNumber) {
-            return A4_FREQ * (2 ** ((midiNumber - 69) / 12));
+      }
+      // --- Audio Control Functions ---
+      async function startMicrophone() {
+        if (isMicrophoneActive) {
+          console.log("Microphone already active.");
+          return;
         }
 
+        // Decide which processAudio function to use based on current mode
+        let audioProcessor;
+        if (currentMode === "trainer") {
+          audioProcessor = processAudioTrainer;
+        } else if (currentMode === "tuner") {
+          audioProcessor = processAudioTuner;
+        } else {
+          // Should not happen if button is hidden, but as a safeguard
+          console.log("Microphone not needed for current mode.");
+          return;
+        }
+
+        audioStream = new AudioPitchStream(audioProcessor);
+        await audioStream.start();
+
+        if (audioStream.running) {
+          isMicrophoneActive = true;
+          toggleAudioButton.textContent = "Stop Microphone";
+          toggleAudioButton.classList.replace("bg-green-600", "bg-red-600");
+          toggleAudioButton.classList.replace(
+            "hover:bg-green-700",
+            "hover:bg-red-700"
+          );
+          toggleAudioButton.classList.add("active"); // Add active class for custom styling
+          displayMessage("Listening...", "neutral", currentMode);
+        } else {
+          // If stream failed to start, revert button state
+          toggleAudioButton.textContent = "Start Microphone";
+          toggleAudioButton.classList.replace("bg-red-600", "bg-green-600");
+          toggleAudioButton.classList.replace(
+            "hover:bg-red-700",
+            "hover:bg-green-700"
+          );
+          toggleAudioButton.classList.remove("active"); // Remove active class
+          isMicrophoneActive = false;
+        }
+      }
+
+      function stopMicrophone() {
+        if (!isMicrophoneActive) {
+          console.log("Microphone already stopped.");
+          return;
+        }
+
+        if (audioStream) {
+          audioStream.stop();
+        }
+        isMicrophoneActive = false;
+        toggleAudioButton.textContent = "Start Microphone";
+        toggleAudioButton.classList.replace("bg-red-600", "bg-green-600");
+        toggleAudioButton.classList.replace(
+          "hover:bg-red-700",
+          "hover:bg-green-700"
+        );
+        toggleAudioButton.classList.remove("active"); // Remove active class
+
+        // Reset specific UI elements based on current mode
+        if (currentMode === "trainer") {
+          displayMessage("Microphone stopped.", "neutral", "trainer");
+          // Clear canvases
+          trainerAmpCtx.clearRect(
+            0,
+            0,
+            trainerAmplitudeCanvas.width,
+            trainerAmplitudeCanvas.height
+          );
+          trainerFreqCtx.clearRect(
+            0,
+            0,
+            trainerFrequencyCanvas.width,
+            trainerFrequencyCanvas.height
+          );
+          trainerNoteLabel.classList.add("text-blue-300"); // Use blue for inactive
+          trainerNoteLabel.classList.remove("text-green-500", "text-red-500");
+          trainerNoteLabel.textContent = trainerTargetNote; // Reset to target note
+        } else if (currentMode === "tuner") {
+          tunerNoteLabel.textContent = "--";
+          tunerOctaveLabel.textContent = "";
+          tunerCentsLabel.textContent = "0 cents";
+          tunerCentsLabel.dataset.status = "neutral";
+          tunerNeedle.style.transform = "translateX(-50%) rotateZ(0deg)";
+          // Clear canvases
+          tunerAmpCtx.clearRect(
+            0,
+            0,
+            tunerAmplitudeCanvas.width,
+            tunerAmplitudeCanvas.height
+          );
+          tunerFreqCtx.clearRect(
+            0,
+            0,
+            tunerFrequencyCanvas.width,
+            tunerFrequencyCanvas.height
+          );
+          tunerNoteLabel.classList.add("text-blue-300"); // Use blue for inactive
+          tunerNoteLabel.classList.remove("text-green-500", "text-red-500");
+          lastStableDetectedNote = null;
+        }
+      }
+
+      // --- Event Listeners and Initial Setup ---
+
+      toggleAudioButton.addEventListener("click", () => {
+        if (isMicrophoneActive) {
+          stopMicrophone();
+        } else {
+          startMicrophone();
+        }
+      });
+
+      trainerModeBtn.addEventListener("click", () => {
+        switchMode("trainer");
+      });
+      tunerModeBtn.addEventListener("click", () => {
+        switchMode("tuner");
+      });
+      scalesModeBtn.addEventListener("click", () => {
+        switchMode("scales");
+      });
+      chordsModeBtn.addEventListener("click", () => {
+        switchMode("chords");
+      });
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        // Set canvas dimensions explicitly for drawing and get contexts
+        trainerAmplitudeCanvas.width = trainerAmplitudeCanvas.offsetWidth;
+        trainerAmplitudeCanvas.height = trainerAmplitudeCanvas.offsetHeight;
+        trainerAmpCtx = trainerAmplitudeCanvas.getContext("2d");
+
+        trainerFrequencyCanvas.width = trainerFrequencyCanvas.offsetWidth;
+        trainerFrequencyCanvas.height = trainerFrequencyCanvas.offsetHeight;
+        trainerFreqCtx = trainerFrequencyCanvas.getContext("2d");
+
+        tunerAmplitudeCanvas.width = tunerAmplitudeCanvas.offsetWidth;
+        tunerAmplitudeCanvas.height = tunerAmplitudeCanvas.offsetHeight;
+        tunerAmpCtx = tunerAmplitudeCanvas.getContext("2d");
+
+        tunerFrequencyCanvas.width = tunerFrequencyCanvas.offsetWidth;
+        tunerFrequencyCanvas.height = tunerFrequencyCanvas.offsetHeight;
+        tunerFreqCtx = tunerFrequencyCanvas.getContext("2d");
+
+        setupStringButtons(); // Create string buttons for Trainer mode
+        setNextTargetTrainer(); // Set initial target note for Trainer mode
+        setupScaleControls(); // Setup dropdowns for Scales mode
+        drawFretboard(); // Draw initial fretboard for Scales mode
+        setupChordControls(); // Setup dropdowns for Chords mode
+        // Initial call to draw chords happens inside switchMode('chords')
+        // if it's the default or explicitly switched to.
+        // If not, drawChordDiagrams is called here to ensure initial state on page load.
+        drawChordDiagrams();
+
+        // Set initial mode to Trainer
+        switchMode("trainer");
+        // Ensure correct button state on load (Trainer is selected)
+        trainerModeBtn.classList.add("selected");
+        displayMessage(
+          "Click 'Start Microphone' to begin.",
+          "neutral",
+          currentMode
+        );
+      });
+
+      // Helper to convert MIDI number to frequency (was missing from previous iteration)
+      function midiNumberToFreq(midiNumber) {
+        return A4_FREQ * 2 ** ((midiNumber - 69) / 12);
+      }
     </script>
-</body>
+  </body>
 </html>
